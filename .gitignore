@@ -1,0 +1,11 @@
+DS_Store
+.idea
+.env
+flyway.conf
+pkged.go
+services/net/venv
+node_modules
+.next
+package-lock.json
+__pycache__
+venv

@@ -1,0 +1,150 @@
+basePath: /api
+definitions:
+  payments.CreatePaymentLinkRequest:
+    properties:
+      plan_id:
+        type: integer
+      promocode_id:
+        type: string
+      version_id:
+        type: string
+    type: object
+  payments.CreatePaymentLinkResponse:
+    properties:
+      code:
+        type: integer
+      url:
+        type: string
+    type: object
+  prompts.CreatePromptRequest:
+    properties:
+      amount_images:
+        type: integer
+      prompt:
+        type: string
+      version_id:
+        type: string
+    type: object
+  versions.IsReadyResponse:
+    properties:
+      code:
+        type: integer
+      is_ready:
+        type: boolean
+    type: object
+  versions.SubmitDataResponse:
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
+      version_id:
+        type: string
+    type: object
+info:
+  contact: {}
+  title: API
+  version: "1.0"
+paths:
+  /v1/payments/create:
+    post:
+      consumes:
+      - application/json
+      description: Create payment link
+      parameters:
+      - description: Payment data
+        in: body
+        name: payment_data
+        required: true
+        schema:
+          $ref: '#/definitions/payments.CreatePaymentLinkRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/payments.CreatePaymentLinkResponse'
+      summary: Create payment link
+      tags:
+      - payments
+  /v1/prompts/create:
+    post:
+      consumes:
+      - application/json
+      description: Start prediction for prompt
+      parameters:
+      - description: Version ID
+        in: query
+        name: id
+        required: true
+        type: string
+      - description: Prompt data
+        in: body
+        name: prompt_data
+        required: true
+        schema:
+          $ref: '#/definitions/prompts.CreatePromptRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/prompts.CreatePromptRequest'
+      summary: Start prediction for prompt
+      tags:
+      - prompts
+  /v1/versions/is-ready:
+    get:
+      description: Get status of version
+      parameters:
+      - description: Version ID
+        in: query
+        name: version_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/versions.IsReadyResponse'
+      summary: Get status of version
+      tags:
+      - versions
+  /v1/versions/submit:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Start training process
+      parameters:
+      - description: Class name
+        in: query
+        name: class
+        required: true
+        type: string
+      - description: Payment ID
+        in: query
+        name: id
+        required: true
+        type: string
+      - description: Data
+        in: formData
+        items:
+          type: file
+        name: data
+        required: true
+        type: array
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/versions.SubmitDataResponse'
+      summary: Start training process
+      tags:
+      - versions
+swagger: "2.0"
