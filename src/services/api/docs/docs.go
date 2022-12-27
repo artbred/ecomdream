@@ -207,9 +207,6 @@ const docTemplate = `{
                 },
                 "prompt": {
                     "type": "string"
-                },
-                "version_id": {
-                    "type": "string"
                 }
             }
         },

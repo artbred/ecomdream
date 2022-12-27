@@ -24,8 +24,6 @@ definitions:
         type: string
       prompt:
         type: string
-      version_id:
-        type: string
     type: object
   versions.IsReadyResponse:
     properties:
