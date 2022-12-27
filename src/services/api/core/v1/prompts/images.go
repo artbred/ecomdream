@@ -2,10 +2,31 @@ package prompts
 
 import (
 	"ecomdream/src/domain/models"
+	"ecomdream/src/domain/replicate"
 	"ecomdream/src/pkg/configs"
 	"ecomdream/src/pkg/storages/cloudflare"
 	"github.com/sirupsen/logrus"
 )
+
+func ReplicateToCloudflare(replicateOutResponse *replicate.Response, prompt *models.Prompt) ([]string, error) {
+	imageChan := make(chan *models.Image, len(replicateOutResponse.Output)-1)
+	for _, imageReplicate := range replicateOutResponse.Output {
+		go replicateImageToCloudflare(prompt, imageReplicate, imageChan)
+	}
+
+	var imagesGeneratedUrls []string
+	for i := 0; i < len(replicateOutResponse.Output); i++ {
+		select {
+		case image := <-imageChan:
+			if image != nil {
+				imagesGeneratedUrls = append(imagesGeneratedUrls, image.CdnURL)
+			}
+		}
+	}
+
+	prompt.PredictionTime = &replicateOutResponse.Metrics.PredictTime
+	return imagesGeneratedUrls, prompt.MarkAsFinished()
+}
 
 func replicateImageToCloudflare(prompt *models.Prompt, urlReplicate string, imageChan chan *models.Image)  {
 	imageCloudflare, err := cloudflare.UploadImageByURL(cloudflare.ImageUploadRequestByURL{

@@ -1,4 +1,4 @@
-package watch_versions
+package push_versions
 
 import (
 	"ecomdream/src/services/worker/logger"
@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-const jobName = "watch-versions"
+const jobName = "push_versions"
 
 type VersionsJob struct {
 	JobName string

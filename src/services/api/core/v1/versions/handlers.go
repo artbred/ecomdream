@@ -100,7 +100,7 @@ func SubmitDataHandler(ctx *fiber.Ctx) error {
 		})
 	}
 
-	inputData := replicate.ConstructDreamBoothInputs(class, zipURL)
+	inputData := replicate.ConstructDreamBoothInputs(class, zipURL, replicate.TrainerVersion)
 
 	replicateRes, err := replicate.StartDreamBoothTraining(context.Background(), inputData)
 	if err != nil {
@@ -121,6 +121,7 @@ func SubmitDataHandler(ctx *fiber.Ctx) error {
 		InstanceData:   inputData.Input.InstanceData,
 		MaxTrainStep:   replicate.MaxTrainingSteps,
 		Model:          &replicate.ModelName,
+		TrainerVersion: replicate.TrainerVersion,
 	}
 
 	err = version.Create(payment)

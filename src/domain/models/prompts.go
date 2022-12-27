@@ -77,3 +77,16 @@ func (p *Prompt) Create() (err error) {
 
 	return
 }
+
+func GetRunningPrompts() (prompts []*Prompt, err error) {
+	conn := postgres.Connection()
+
+	query := `SELECT * FROM prompts WHERE finished_at IS NULL`
+
+	err = conn.Select(&prompts, query)
+	if err != nil {
+		logrus.WithError(err).Error("Can't get running prompts")
+	}
+
+	return
+}

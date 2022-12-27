@@ -1,4 +1,4 @@
-package watch_versions
+package push_versions
 
 import (
 	"context"

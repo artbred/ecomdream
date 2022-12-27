@@ -4,10 +4,12 @@ import (
 	"context"
 	"ecomdream/src/domain/models"
 	"ecomdream/src/domain/replicate"
+	"ecomdream/src/pkg/storages/redisdb"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/sirupsen/logrus"
 	"github.com/twinj/uuid"
+	"time"
 )
 
 // CreatePromptHandler handler that start prediction for model
@@ -59,19 +61,19 @@ func CreatePromptHandler(ctx *fiber.Ctx) error {
 		})
 	}
 
-	hasRunningPrompts, err := version.HasRunningPrompts(); if err != nil {
-		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"code":    fiber.StatusInternalServerError,
-			"message": "Please try again later",
-		})
-	}
-
-	if hasRunningPrompts {
-		return ctx.Status(fiber.StatusForbidden).JSON(fiber.Map{
-			"code":    fiber.StatusForbidden,
-			"message": "You have one prompt running, the max wait time is 5 minutes, please wait for it to complete",
-		})
-	}
+	//hasRunningPrompts, err := version.HasRunningPrompts(); if err != nil {
+	//	return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+	//		"code":    fiber.StatusInternalServerError,
+	//		"message": "Please try again later",
+	//	})
+	//}
+	//
+	//if hasRunningPrompts {
+	//	return ctx.Status(fiber.StatusForbidden).JSON(fiber.Map{
+	//		"code":    fiber.StatusForbidden,
+	//		"message": "You have one prompt running, the max wait time is 5 minutes, please wait for it to complete",
+	//	})
+	//}
 
 	features, err := version.GetUnifiedFeatures(); if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -128,6 +130,11 @@ func CreatePromptHandler(ctx *fiber.Ctx) error {
 		})
 	}
 
+	key := redisdb.BuildReplicatePredictionFreeze(prompt.PredictionID)
+	rdb := redisdb.Connection()
+	rdb.SetNX(context.Background(), key, true, 5*time.Minute)
+	defer rdb.Del(context.Background(), key)
+
 	replicateOutResponse, err := replicate.WaitForPrediction(context.Background(), prompt.PredictionID)
 	if err != nil {
 		logrus.WithError(err).Errorf("Failed to create images for prompt %s", prompt.ID)
@@ -137,23 +144,7 @@ func CreatePromptHandler(ctx *fiber.Ctx) error {
 		})
 	}
 
-	imageChan := make(chan *models.Image, len(replicateOutResponse.Output) - 1)
-	for _, imageReplicate := range replicateOutResponse.Output {
-		go replicateImageToCloudflare(prompt, imageReplicate, imageChan)
-	}
-
-	var imagesGeneratedUrls []string
-	for i := 0; i < len(replicateOutResponse.Output); i++ {
-		select {
-			case image := <-imageChan:
-				if image != nil {
-					imagesGeneratedUrls = append(imagesGeneratedUrls, image.CdnURL)
-				}
-		}
-	}
-
-	prompt.PredictionTime = &replicateOutResponse.Metrics.PredictTime
-	err = prompt.MarkAsFinished()
+	imagesGeneratedUrls, err := ReplicateToCloudflare(replicateOutResponse, prompt)
 
 	if err != nil || len(imagesGeneratedUrls) == 0 {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -163,10 +154,10 @@ func CreatePromptHandler(ctx *fiber.Ctx) error {
 	}
 
 	return ctx.Status(fiber.StatusCreated).JSON(CreatePromptResponse{
-		Code: fiber.StatusCreated,
-		Images: imagesGeneratedUrls,
-		ImagesLeft: features.FeatureAmountImages - version.AmountImagesGenerated - len(imagesGeneratedUrls),
-		PromptText: prompt.PromptText,
+		Code:           fiber.StatusCreated,
+		Images:         imagesGeneratedUrls,
+		ImagesLeft:     features.FeatureAmountImages - version.AmountImagesGenerated - len(imagesGeneratedUrls),
+		PromptText:     prompt.PromptText,
 		PromptNegative: prompt.PromptNegative,
 	})
 }

@@ -40,6 +40,38 @@ func StartPrediction(body []byte) (response *Response, err error) {
 	return
 }
 
+func CheckPrediction(ctx context.Context, predictionID string) (result *Response, err error) {
+	req, err := http.NewRequestWithContext(ctx, "GET", fmt.Sprintf("%s/%s", baseURL, predictionID), nil)
+	req.Header.Add("Authorization", fmt.Sprintf("Token %s", apiToken))
+	req.Header.Add("Content-Type", "application/json")
+
+	httpClient := http.Client{}
+
+	res, err := httpClient.Do(req); if err != nil {
+		return nil, err
+	}
+
+	body, err := io.ReadAll(res.Body); if err != nil {
+		return nil, err
+	}
+
+	defer res.Body.Close()
+
+	if err = json.Unmarshal(body, &result); err != nil {
+		return nil, err
+	}
+
+	if result.Status == "succeeded" {
+		return result, nil
+	}
+
+	if result.Status == "failed" {
+		return nil, fmt.Errorf("failed to inference, %s", result.Error)
+	}
+
+	return nil, nil
+}
+
 func WaitForPrediction(ctx context.Context, predictionID string) (result *Response, err error) {
 	errorChan := make(chan error)
 
@@ -82,7 +114,7 @@ func WaitForPrediction(ctx context.Context, predictionID string) (result *Respon
 	}()
 
 	err = <-errorChan; if err != nil {
-		return nil, err
+		return nil, parseError(err)
 	}
 
 	return

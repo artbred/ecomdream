@@ -1,7 +1,8 @@
 package main
 
 import (
-	"ecomdream/src/services/worker/jobs/watch_versions"
+	"ecomdream/src/services/worker/jobs/dangling_prompts"
+	"ecomdream/src/services/worker/jobs/push_versions"
 	"time"
 )
 
@@ -11,15 +12,18 @@ type Job interface {
 
 func GetJob(jobName string) Job {
 	switch jobName {
-	case "watch_versions":
-		return watch_versions.CreatJob()
-	default:
-		return nil
+		case "push_versions":
+			return push_versions.CreatJob()
+		case "dangling_prompts":
+			return dangling_prompts.CreatJob()
+		default:
+			return nil
 	}
 }
 
 func main() {
-	go GetJob("watch_versions").Start(1 * time.Minute)
+	go GetJob("push_versions").Start(1 * time.Minute)
+	go GetJob("dangling_prompts").Start(30 * time.Second)
 
-	<-make(chan bool)
+	<- make(chan uint8)
 }

@@ -43,14 +43,14 @@ var (
 	UniqueIdentifier = "xjy"
 )
 
-func ConstructDreamBoothInputs(class, zipURL string) DreamBoothRequest {
+func ConstructDreamBoothInputs(class, zipURL, trainerVersion string) DreamBoothRequest {
 	return DreamBoothRequest{
 		Input: DreamBoothInput{
 			InstanceData:   zipURL,
 			MaxTrainSteps:  MaxTrainingSteps,
 			ClassPrompt:    fmt.Sprintf("a %s", class),
 			InstancePrompt: fmt.Sprintf("a photo of a %s %s", UniqueIdentifier, class),
-			TrainerVersion: TrainerVersion,
+			TrainerVersion: trainerVersion,
 		},
 		Model: ModelName,
 	}
@@ -60,6 +60,7 @@ func ConstructDreamBoothInputs(class, zipURL string) DreamBoothRequest {
 func CheckDreamBoothTraining(ctx context.Context, id string) (response DreamBoothResponse, err error) {
 	req, err := http.NewRequestWithContext(ctx, "GET", fmt.Sprintf("%s/%s", dreamBoothBaseURL, id), nil)
 	req.Header.Add("Authorization", fmt.Sprintf("Token %s", apiToken))
+	req.Header.Add("Content-Type", "application/json")
 
 	client := &http.Client{}
 
