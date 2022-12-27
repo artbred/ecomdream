@@ -96,7 +96,7 @@ func GetPayment(id string) (payment *Payment, err error) {
 		return
 	}
 
-	//TODO one query
+	// TODO left join
 	if payment.VersionID != nil {
 		payment.Version, err = GetVersion(*payment.VersionID)
 	}

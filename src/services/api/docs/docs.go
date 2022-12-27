@@ -202,6 +202,9 @@ const docTemplate = `{
                 "amount_images": {
                     "type": "integer"
                 },
+                "negative_prompt": {
+                    "type": "string"
+                },
                 "prompt": {
                     "type": "string"
                 },

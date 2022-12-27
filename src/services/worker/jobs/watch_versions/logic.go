@@ -3,7 +3,7 @@ package watch_versions
 import (
 	"context"
 	"ecomdream/src/domain/models"
-	"ecomdream/src/pkg/api/replicate"
+	"ecomdream/src/domain/replicate"
 	"time"
 )
 
@@ -29,6 +29,7 @@ func (j *VersionsJob) Logic() {
 			}
 		} else if time.Now().UTC().Sub(version.CreatedAt) >= 1*time.Hour {
 			j.logger.WithField("version_id", version.ID).Warning("Takes too long, need to check")
+			// TODO informer
 		}
 	}
 

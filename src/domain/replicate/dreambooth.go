@@ -7,10 +7,13 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
+	"strconv"
 )
 
 var (
 	dreamBoothBaseURL = "https://dreambooth-api-experimental.replicate.com/v1/trainings"
+	TrainerVersion = "d5e058608f43886b9620a8fbb1501853b8cbae4f45c857a014011c86ee614ffb"
 )
 
 type DreamBoothRequest struct {
@@ -23,6 +26,7 @@ type DreamBoothInput struct {
 	ClassPrompt string `json:"class_prompt"`
 	InstanceData string `json:"instance_data"`
 	MaxTrainSteps int64 `json:"max_train_steps"`
+	TrainerVersion string `json:"trainer_version"`
 }
 
 type DreamBoothResponse struct {
@@ -32,6 +36,26 @@ type DreamBoothResponse struct {
 	Status string `json:"status"`
 	Version *string `json:"version"`
 }
+
+var (
+	MaxTrainingSteps int64 = 2000
+	ModelName        string
+	UniqueIdentifier = "xjy"
+)
+
+func ConstructDreamBoothInputs(class, zipURL string) DreamBoothRequest {
+	return DreamBoothRequest{
+		Input: DreamBoothInput{
+			InstanceData:   zipURL,
+			MaxTrainSteps:  MaxTrainingSteps,
+			ClassPrompt:    fmt.Sprintf("a %s", class),
+			InstancePrompt: fmt.Sprintf("a photo of a %s %s", UniqueIdentifier, class),
+			TrainerVersion: TrainerVersion,
+		},
+		Model: ModelName,
+	}
+}
+
 
 func CheckDreamBoothTraining(ctx context.Context, id string) (response DreamBoothResponse, err error) {
 	req, err := http.NewRequestWithContext(ctx, "GET", fmt.Sprintf("%s/%s", dreamBoothBaseURL, id), nil)
@@ -100,3 +124,7 @@ func StartDreamBoothTraining(ctx context.Context, modelRequest DreamBoothRequest
 	return
 }
 
+func init() {
+	MaxTrainingSteps, _ = strconv.ParseInt(os.Getenv("MAX_TRAINING_STEPS"), 10, 64)
+	ModelName = os.Getenv("REPLICATE_MODEL_NAME")
+}

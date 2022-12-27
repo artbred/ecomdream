@@ -2,6 +2,7 @@ create table versions (
     id varchar unique primary key not null,
 
     model_id varchar unique null,
+    trainer_version varchar not null,
     prediction_id varchar unique not null,
 
     identifier varchar not null,
@@ -15,7 +16,8 @@ create table versions (
     model varchar null,
 
     created_at timestamp with time zone not null,
-    pushed_at timestamp with time zone null
+    pushed_at timestamp with time zone null,
+    deleted_at timestamp with time zone null
 );
 
 create or replace function version_is_pushed (varchar) returns boolean as $$

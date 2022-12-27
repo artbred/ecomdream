@@ -1,8 +1,13 @@
 package prompts
 
 import (
+	"context"
 	"ecomdream/src/domain/models"
+	"ecomdream/src/domain/replicate"
+	"fmt"
 	"github.com/gofiber/fiber/v2"
+	"github.com/sirupsen/logrus"
+	"github.com/twinj/uuid"
 )
 
 // CreatePromptHandler handler that start prediction for model
@@ -47,15 +52,121 @@ func CreatePromptHandler(ctx *fiber.Ctx) error {
 		})
 	}
 
-	features, err := version.GetUnifiedFeatures()
-	if err != nil {
+	if version.DeletedAt != nil {
+		return ctx.Status(fiber.StatusForbidden).JSON(fiber.Map{
+			"code":    fiber.StatusForbidden,
+			"message": "Your model has been deleted",
+		})
+	}
+
+	hasRunningPrompts, err := version.HasRunningPrompts(); if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"code":    fiber.StatusInternalServerError,
 			"message": "Please try again later",
 		})
 	}
 
-	_ = features
+	if hasRunningPrompts {
+		return ctx.Status(fiber.StatusForbidden).JSON(fiber.Map{
+			"code":    fiber.StatusForbidden,
+			"message": "You have one prompt running, the max wait time is 5 minutes, please wait for it to complete",
+		})
+	}
 
-	return nil
+	features, err := version.GetUnifiedFeatures(); if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"code":    fiber.StatusInternalServerError,
+			"message": "Please try again later",
+		})
+	}
+
+	if features.FeatureAmountImages - version.AmountImagesGenerated - req.AmountImages <= 0 {
+		text := fmt.Sprintf("You can only generate %d images", features.FeatureAmountImages - version.AmountImagesGenerated)
+		if features.FeatureAmountImages - version.AmountImagesGenerated <= 0 {
+			text = "You ran out of images, you need to purchase extra package to continue working"
+		}
+		return ctx.Status(fiber.StatusForbidden).JSON(fiber.Map{
+			"code":    fiber.StatusForbidden,
+			"message": text,
+		})
+	}
+
+	prompt := &models.Prompt{
+		ID:             uuid.NewV4().String(),
+		VersionID:      version.ID,
+		PromptText:     req.Prompt,
+		PromptNegative: req.NegativePrompt,
+		AmountImages:   req.AmountImages,
+		InferenceSteps: 50,
+		Width:          512,
+		Height:         512,
+		PromptStrength: 0.8,
+		GuidanceScale:  7.5,
+	}
+
+	replicateReq, err := prompt.TransferToReplicateBody(version); if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"code":    fiber.StatusInternalServerError,
+			"message": "Please try again later",
+		})
+	}
+
+	replicateInitResponse, err := replicate.StartPrediction(replicateReq)
+	if err != nil {
+		logrus.WithError(err).Errorf("Can't start prediction for prompt %+v", prompt)
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"code":    fiber.StatusInternalServerError,
+			"message": "Please try again later",
+		})
+	}
+
+	prompt.PredictionID = replicateInitResponse.ID
+	err = prompt.Create(); if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"code":    fiber.StatusInternalServerError,
+			"message": "Please try again later",
+		})
+	}
+
+	replicateOutResponse, err := replicate.WaitForPrediction(context.Background(), prompt.PredictionID)
+	if err != nil {
+		logrus.WithError(err).Errorf("Failed to create images for prompt %s", prompt.ID)
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"code":    fiber.StatusInternalServerError,
+			"message": "Please try again later",
+		})
+	}
+
+	imageChan := make(chan *models.Image, len(replicateOutResponse.Output) - 1)
+	for _, imageReplicate := range replicateOutResponse.Output {
+		go replicateImageToCloudflare(prompt, imageReplicate, imageChan)
+	}
+
+	var imagesGeneratedUrls []string
+	for i := 0; i < len(replicateOutResponse.Output); i++ {
+		select {
+			case image := <-imageChan:
+				if image != nil {
+					imagesGeneratedUrls = append(imagesGeneratedUrls, image.CdnURL)
+				}
+		}
+	}
+
+	prompt.PredictionTime = &replicateOutResponse.Metrics.PredictTime
+	err = prompt.MarkAsFinished()
+
+	if err != nil || len(imagesGeneratedUrls) == 0 {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"code":    fiber.StatusInternalServerError,
+			"message": "Please try again later",
+		})
+	}
+
+	return ctx.Status(fiber.StatusCreated).JSON(CreatePromptResponse{
+		Code: fiber.StatusCreated,
+		Images: imagesGeneratedUrls,
+		ImagesLeft: features.FeatureAmountImages - version.AmountImagesGenerated - len(imagesGeneratedUrls),
+		PromptText: prompt.PromptText,
+		PromptNegative: prompt.PromptNegative,
+	})
 }

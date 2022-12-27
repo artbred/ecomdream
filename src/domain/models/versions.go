@@ -20,11 +20,13 @@ type Version struct {
 	ClassPrompt    string `db:"class_prompt"`
 	InstanceData   string `db:"instance_data"`
 
+	TrainerVersion string `db:"trainer_version"`
 	MaxTrainStep int64  `db:"max_train_steps"`
-	Model        string `db:"model"`
+	Model        *string `db:"model"`
 
 	CreatedAt time.Time  `db:"created_at"`
 	PushedAt  *time.Time `db:"pushed_at"`
+	DeletedAt *time.Time `db:"deleted_at"`
 
 	AmountImagesGenerated int `db:"amount_images_generated"`
 }
@@ -40,8 +42,8 @@ func (v *Version) Create(payment *Payment) (err error) {
 		}
 	}()
 
-	queryVersion := `INSERT INTO versions (id, prediction_id, identifier, class, instance_prompt, class_prompt, instance_data, max_train_steps, model, created_at) VALUES (
-    	:id, :prediction_id, :identifier, :class, :instance_prompt, :class_prompt, :instance_data, :max_train_steps, :model, now())`
+	queryVersion := `INSERT INTO versions (id, prediction_id, identifier, class, instance_prompt, class_prompt, instance_data, max_train_steps, model, trainer_version, created_at) VALUES (
+    	:id, :prediction_id, :identifier, :class, :instance_prompt, :class_prompt, :instance_data, :max_train_steps, :model, :trainer_version, now())`
 
 	_, err = tx.NamedExec(queryVersion, v)
 	if err != nil {
@@ -67,8 +69,8 @@ func GetVersion(id string) (version *Version, err error) {
 	query := `SELECT
     	versions.*,
        	count(images.id) as amount_images_generated FROM versions
-		INNER JOIN prompts ON prompts.id=versions.id
-		INNER JOIN images ON images.prompt_id=prompts.id
+		LEFT JOIN prompts ON prompts.version_id=versions.id
+		LEFT JOIN images ON images.prompt_id=prompts.id
 		WHERE versions.id=$1 GROUP BY versions.id`
 
 	err = conn.Get(version, query, id)
@@ -111,13 +113,43 @@ func (v *Version) GetUnifiedFeatures() (features Features, err error) {
 
 	query := `SELECT
 		SUM(feature_amount_images) as feature_amount_images,
-		bool_or(feature_prompts_database) as feature_prompts_database,
-		SUM(feature_upscale_limit) as feature_upscale_limit
+		SUM(feature_amount_image_to_prompt) as feature_amount_image_to_prompt
 		FROM payments INNER JOIN plans ON payments.plan_id = plans.id WHERE payments.version_id=$1 AND payments.paid_at IS NOT NULL`
 
 	err = conn.Get(&features, query, v.ID)
 	if err != nil {
 		logrus.WithError(err).Errorf("Can't get unified features for version %s", v.ID)
+	}
+
+	return
+}
+
+func (v *Version) GetImages() (images []Image, err error) {
+	conn := postgres.Connection()
+
+	query := `
+		select images.* from versions where version.id=$1
+		    inner join prompts on (prompts.version_id = versions.id)
+		    inner join images on (images.prompt_id = prompts.id)
+			order by created_at desc
+	`
+
+	err = conn.Select(&images, query, v.ID); if err != nil {
+		logrus.WithError(err).Errorf("Can't get images for version %s", v.ID)
+	}
+
+	return
+}
+
+func (v *Version) HasRunningPrompts() (exists bool, err error) {
+	conn := postgres.Connection()
+
+	query := `select exists (select 1 from prompts
+			where version_id=$1
+		  	and finished_at is null and created_at + interval '5 minute' > now())`
+
+	err = conn.Get(&exists, query, v.ID); if err != nil {
+		logrus.WithError(err).Errorf("Can't identify if version %s has running prompts", v.ID)
 	}
 
 	return

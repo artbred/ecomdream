@@ -2,7 +2,7 @@ package payments
 
 import (
 	"ecomdream/src/domain/models"
-	"ecomdream/src/pkg/api/informer"
+	"ecomdream/src/pkg/external/informer"
 	"encoding/json"
 	"fmt"
 	"github.com/gofiber/fiber/v2"

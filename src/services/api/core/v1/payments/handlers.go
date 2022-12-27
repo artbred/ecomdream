@@ -1,7 +1,7 @@
 package payments
 
 import (
-	models2 "ecomdream/src/domain/models"
+	"ecomdream/src/domain/models"
 	"ecomdream/src/pkg/configs"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
@@ -31,7 +31,7 @@ func CreatePaymentLinkHandler(ctx *fiber.Ctx) error {
 		})
 	}
 
-	plan, err := models2.GetPlan(req.PlanID)
+	plan, err := models.GetPlan(req.PlanID)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"code":    fiber.StatusInternalServerError,
@@ -53,7 +53,7 @@ func CreatePaymentLinkHandler(ctx *fiber.Ctx) error {
 		})
 	}
 
-	payment := &models2.Payment{
+	payment := &models.Payment{
 		ID:     uuid.NewV4().String(),
 		PlanID: plan.ID,
 	}
@@ -69,7 +69,7 @@ func CreatePaymentLinkHandler(ctx *fiber.Ctx) error {
 			})
 		}
 
-		version, err := models2.GetVersion(*req.VersionID)
+		version, err := models.GetVersion(*req.VersionID)
 		if err != nil {
 			return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 				"code":    fiber.StatusInternalServerError,

@@ -22,7 +22,7 @@ func SetupAPI(router fiber.Router) {
 // @version 1.0
 // @BasePath /api
 func main() {
-	app := fiber.New(configs.LoadFiberServerConfig())
+	app := fiber.New(server.LoadFiberServerConfig())
 
 	middleware.SetupMiddleware(app)
 	swagger.ServeDocs(app)

@@ -2,8 +2,8 @@ package versions
 
 import (
 	"context"
-	models2 "ecomdream/src/domain/models"
-	"ecomdream/src/pkg/api/replicate"
+	"ecomdream/src/domain/models"
+	"ecomdream/src/domain/replicate"
 	"ecomdream/src/pkg/storages/bucket"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
@@ -39,7 +39,7 @@ func SubmitDataHandler(ctx *fiber.Ctx) error {
 		})
 	}
 
-	payment, err := models2.GetPayment(paymentID)
+	payment, err := models.GetPayment(paymentID)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"code":    fiber.StatusInternalServerError,
@@ -100,7 +100,7 @@ func SubmitDataHandler(ctx *fiber.Ctx) error {
 		})
 	}
 
-	inputData := ConstructDreamBoothInputs(class, zipURL)
+	inputData := replicate.ConstructDreamBoothInputs(class, zipURL)
 
 	replicateRes, err := replicate.StartDreamBoothTraining(context.Background(), inputData)
 	if err != nil {
@@ -111,16 +111,16 @@ func SubmitDataHandler(ctx *fiber.Ctx) error {
 		})
 	}
 
-	version := &models2.Version{
+	version := &models.Version{
 		ID:             uuid.NewV4().String(),
 		PredictionID:   replicateRes.ID,
-		Identifier:     uniqueIdentifier,
+		Identifier:     replicate.UniqueIdentifier,
 		Class:          class,
 		InstancePrompt: inputData.Input.InstancePrompt,
 		ClassPrompt:    inputData.Input.ClassPrompt,
 		InstanceData:   inputData.Input.InstanceData,
-		MaxTrainStep:   maxTrainingSteps,
-		Model:          modelName,
+		MaxTrainStep:   replicate.MaxTrainingSteps,
+		Model:          &replicate.ModelName,
 	}
 
 	err = version.Create(payment)
@@ -150,15 +150,14 @@ func SubmitDataHandler(ctx *fiber.Ctx) error {
 // @Success 200 {object} IsReadyResponse
 // @Router /v1/versions/is-ready [get]
 func IsReadyHandler(ctx *fiber.Ctx) error {
-	id := ctx.Query("version_id")
-	if len(id) <= 0 {
+	id := ctx.Query("version_id"); if len(id) <= 0 {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"code":    fiber.StatusBadRequest,
 			"message": "Provide version id",
 		})
 	}
 
-	version, err := models2.GetVersion(id)
+	version, err := models.GetVersion(id)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"code":    fiber.StatusInternalServerError,
@@ -173,8 +172,7 @@ func IsReadyHandler(ctx *fiber.Ctx) error {
 		})
 	}
 
-	isReady := true
-	if version.PushedAt == nil {
+	isReady := true; if version.PushedAt == nil {
 		isReady = false
 	}
 

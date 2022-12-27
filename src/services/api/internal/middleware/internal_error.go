@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"ecomdream/src/pkg/api/informer"
+	"ecomdream/src/pkg/external/informer"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"time"

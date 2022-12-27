@@ -18,11 +18,11 @@ type Plan struct {
 	IsInit bool  `db:"is_init"`
 	Price  int64 `db:"price"`
 
-	PlanName        string `db:"plan_name"`
+	PlanName string `db:"plan_name"`
 	PlanDescription string `db:"plan_description"`
 
-	IsDeprecated bool      `db:"is_deprecated"`
-	CreatedAt    time.Time `db:"created_at"`
+	IsDeprecated bool `db:"is_deprecated"`
+	CreatedAt time.Time `db:"created_at"`
 
 	Features
 }

@@ -20,6 +20,8 @@ definitions:
     properties:
       amount_images:
         type: integer
+      negative_prompt:
+        type: string
       prompt:
         type: string
       version_id:
