@@ -6,7 +6,6 @@ import (
 	"ecomdream/src/domain/replicate"
 	"ecomdream/src/pkg/storages/redisdb"
 	"ecomdream/src/services/api/core/v1/prompts"
-	"github.com/go-redis/redis/v8"
 )
 
 func (j *PromptsJob) Logic() {
@@ -18,19 +17,8 @@ func (j *PromptsJob) Logic() {
 	counterPushed := 0
 
 	for _, prompt := range runningPrompts {
-		key := redisdb.BuildReplicatePredictionFreeze(prompt.PredictionID)
-		rdb := redisdb.Connection()
-
-		isBlocked, err := rdb.Get(context.Background(), key).Bool()
-		if err != nil {
-			if err == redis.Nil {
-				isBlocked = false
-			} else {
-				j.logger.Error(err)
-			}
-		}
-
-		if isBlocked {
+		key := redisdb.BuildBlockReplicatePrediction(prompt.PredictionID)
+		if key.IsBlocked() {
 			continue
 		}
 

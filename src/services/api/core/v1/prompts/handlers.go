@@ -130,7 +130,7 @@ func CreatePromptHandler(ctx *fiber.Ctx) error {
 		})
 	}
 
-	key := redisdb.BuildReplicatePredictionFreeze(prompt.PredictionID)
+	key := redisdb.BuildBlockReplicatePrediction(prompt.PredictionID)
 	rdb := redisdb.Connection()
 	rdb.SetNX(context.Background(), key, true, 5*time.Minute)
 	defer rdb.Del(context.Background(), key)

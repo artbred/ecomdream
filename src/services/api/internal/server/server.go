@@ -9,6 +9,7 @@ import (
 	"os/signal"
 )
 
+//TODO clear redis
 func StartServerWithGracefulShutdown(a *fiber.App) {
 	idleConnClosed := make(chan struct{})
 
