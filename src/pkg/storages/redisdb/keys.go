@@ -25,8 +25,8 @@ func (k Key) IsBlocked() bool {
 	return isBlocked
 }
 
-func BuildBlockEndpointKey(endpoint, id string) Key {
-	return Key(fmt.Sprintf("block_api_endpoint:%s:%s", endpoint, id))
+func BuildFreezeEndpointKey(endpoint, id string) Key {
+	return Key(fmt.Sprintf("freeze_api_endpoint:%s:%s", endpoint, id))
 }
 
 func BuildBlockReplicatePrediction(predictionID string) Key {

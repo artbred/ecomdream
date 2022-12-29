@@ -8,11 +8,11 @@ import (
 )
 
 func FreezeEndpointForID(ctx *fiber.Ctx) error {
-	id := ctx.Query("id"); if len(id) == 0 {
+	id := string(ctx.Request().URI().LastPathSegment()); if len(id) == 0 { //TODO ctx.Params("id")
 		return ctx.Next()
 	}
 
-	key := redisdb.BuildBlockEndpointKey(string(ctx.Request().URI().Path()), id)
+	key := redisdb.BuildFreezeEndpointKey(string(ctx.Request().URI().Path()), id)
 	rdb := redisdb.Connection()
 
 	if key.IsBlocked() {

@@ -1,6 +1,6 @@
 package versions
 
-type SubmitDataResponse struct {
+type TrainVersionResponse struct {
 	Code int `json:"code"`
 	Message string `json:"message"`
 	VersionID string `json:"version_id"`

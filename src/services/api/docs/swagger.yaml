@@ -32,7 +32,7 @@ definitions:
       is_ready:
         type: boolean
     type: object
-  versions.SubmitDataResponse:
+  versions.TrainVersionResponse:
     properties:
       code:
         type: integer
@@ -68,14 +68,14 @@ paths:
       summary: Create payment link
       tags:
       - payments
-  /v1/prompts/create:
+  /v1/prompts/create/{id}:
     post:
       consumes:
       - application/json
       description: Start prediction for prompt
       parameters:
       - description: Version ID
-        in: query
+        in: path
         name: id
         required: true
         type: string
@@ -114,7 +114,7 @@ paths:
       summary: Get status of version
       tags:
       - versions
-  /v1/versions/submit:
+  /v1/versions/train/{id}:
     post:
       consumes:
       - multipart/form-data
@@ -126,7 +126,7 @@ paths:
         required: true
         type: string
       - description: Payment ID
-        in: query
+        in: path
         name: id
         required: true
         type: string
@@ -143,7 +143,7 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/versions.SubmitDataResponse'
+            $ref: '#/definitions/versions.TrainVersionResponse'
       summary: Start training process
       tags:
       - versions

@@ -6,6 +6,6 @@ import (
 )
 
 func Init(router fiber.Router) {
-	router.Use(middleware.FreezeEndpointForID).Post("/submit", SubmitDataHandler)
+	router.Use(middleware.FreezeEndpointForID).Post("/train/:id", TrainVersionHandler)
 	router.Get("/is-ready", IsReadyHandler)
 }

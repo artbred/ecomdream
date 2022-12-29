@@ -18,10 +18,10 @@ import (
 // @Tags prompts
 // @Accept json
 // @Produce json
-// @Param id query string true "Version ID"
+// @Param id path string true "Version ID"
 // @Param prompt_data body CreatePromptRequest true "Prompt data"
 // @Success 201 {object} CreatePromptRequest
-// @Router /v1/prompts/create [post]
+// @Router /v1/prompts/create/{id} [post]
 func CreatePromptHandler(ctx *fiber.Ctx) error {
 	req := &CreatePromptRequest{}
 
@@ -132,8 +132,8 @@ func CreatePromptHandler(ctx *fiber.Ctx) error {
 
 	key := redisdb.BuildBlockReplicatePrediction(prompt.PredictionID)
 	rdb := redisdb.Connection()
-	rdb.SetNX(context.Background(), key, true, 5*time.Minute)
-	defer rdb.Del(context.Background(), key)
+	rdb.SetNX(context.Background(), string(key), true, 5*time.Minute)
+	defer rdb.Del(context.Background(), string(key))
 
 	replicateOutResponse, err := replicate.WaitForPrediction(context.Background(), prompt.PredictionID)
 	if err != nil {
@@ -145,7 +145,6 @@ func CreatePromptHandler(ctx *fiber.Ctx) error {
 	}
 
 	imagesGeneratedUrls, err := ReplicateToCloudflare(replicateOutResponse, prompt)
-
 	if err != nil || len(imagesGeneratedUrls) == 0 {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"code":    fiber.StatusInternalServerError,

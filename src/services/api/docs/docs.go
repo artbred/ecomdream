@@ -50,7 +50,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/prompts/create": {
+        "/v1/prompts/create/{id}": {
             "post": {
                 "description": "Start prediction for prompt",
                 "consumes": [
@@ -68,7 +68,7 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Version ID",
                         "name": "id",
-                        "in": "query",
+                        "in": "path",
                         "required": true
                     },
                     {
@@ -120,7 +120,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/versions/submit": {
+        "/v1/versions/train/{id}": {
             "post": {
                 "description": "Start training process",
                 "consumes": [
@@ -145,7 +145,7 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Payment ID",
                         "name": "id",
-                        "in": "query",
+                        "in": "path",
                         "required": true
                     },
                     {
@@ -163,7 +163,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/versions.SubmitDataResponse"
+                            "$ref": "#/definitions/versions.TrainVersionResponse"
                         }
                     }
                 }
@@ -221,7 +221,7 @@ const docTemplate = `{
                 }
             }
         },
-        "versions.SubmitDataResponse": {
+        "versions.TrainVersionResponse": {
             "type": "object",
             "properties": {
                 "code": {

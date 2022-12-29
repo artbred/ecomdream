@@ -11,28 +11,26 @@ import (
 	"github.com/twinj/uuid"
 )
 
-// SubmitDataHandler handler that accepts data for training
+// TrainVersionHandler handler that accepts data for training
 // @Description Start training process
 // @Summary Start training process
 // @Tags versions
 // @Accept multipart/form-data
 // @Produce json
 // @Param class query string true "Class name"
-// @Param id query string true "Payment ID"
+// @Param id path string true "Payment ID"
 // @Param data formData []file true "Data"
-// @Success 201 {object} SubmitDataResponse
-// @Router /v1/versions/submit [post]
-func SubmitDataHandler(ctx *fiber.Ctx) error {
-	paymentID := ctx.Query("id")
-	if len(paymentID) <= 0 {
+// @Success 201 {object} TrainVersionResponse
+// @Router /v1/versions/train/{id} [post]
+func TrainVersionHandler(ctx *fiber.Ctx) error {
+	paymentID := ctx.Query("id"); if len(paymentID) <= 0 {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"code":    fiber.StatusBadRequest,
 			"message": "Provide payment id",
 		})
 	}
 
-	class := ctx.Query("class")
-	if len(class) <= 0 {
+	class := ctx.Query("class"); if len(class) <= 0 {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"code":    fiber.StatusBadRequest,
 			"message": "Provide class",
@@ -135,7 +133,7 @@ func SubmitDataHandler(ctx *fiber.Ctx) error {
 
 	logrus.Infof("Strarted training proccess for payment %s", payment.ID)
 
-	return ctx.Status(fiber.StatusCreated).JSON(SubmitDataResponse{
+	return ctx.Status(fiber.StatusCreated).JSON(TrainVersionResponse{
 		Code:      fiber.StatusCreated,
 		Message:   "Successfully!",
 		VersionID: version.ID,

@@ -25,7 +25,7 @@ func (r *CreatePromptRequest) Validate(ctx *fiber.Ctx) (err error) {
 		return
 	}
 
-	versionID := ctx.Query("id"); if len(versionID) == 0 {
+	versionID := ctx.Params("id"); if len(versionID) == 0 {
 		return errors.New("Provide version id")
 	}
 
