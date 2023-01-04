@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-// CreatePromptHandler handler that start prediction for model
+// CreatePromptForIDHandler handler that start prediction for model
 // @Description Start prediction for prompt
 // @Summary Start prediction for prompt
 // @Tags prompts
@@ -22,7 +22,7 @@ import (
 // @Param prompt_data body CreatePromptRequest true "Prompt data"
 // @Success 201 {object} CreatePromptRequest
 // @Router /v1/prompts/create/{id} [post]
-func CreatePromptHandler(ctx *fiber.Ctx) error {
+func CreatePromptForIDHandler(ctx *fiber.Ctx) error {
 	req := &CreatePromptRequest{}
 
 	if err := req.Validate(ctx); err != nil {
@@ -158,5 +158,36 @@ func CreatePromptHandler(ctx *fiber.Ctx) error {
 		ImagesLeft:     features.FeatureAmountImages - version.AmountImagesGenerated - len(imagesGeneratedUrls),
 		PromptText:     prompt.PromptText,
 		PromptNegative: prompt.PromptNegative,
+	})
+}
+
+
+// ListPromptsForIDHandler handler that returns prompts and images for version
+// @Description Returns prompts and images for version
+// @Summary Returns prompts and images for version
+// @Tags prompts
+// @Accept json
+// @Produce json
+// @Param id path string true "Version ID"
+// @Success 201 {object} CreatePromptRequest
+// @Router /v1/prompts/list/{id} [get]
+func ListPromptsForIDHandler(ctx *fiber.Ctx) error {
+	id := ctx.Params("id"); if len(id) == 0 {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"code": fiber.StatusBadRequest,
+			"message": "Provide version id",
+		})
+	}
+
+	prompts, err := models.GetCompletedPromptsForVersion(id); if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"code": fiber.StatusInternalServerError,
+			"message": "Please try again later",
+		})
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(ListPromptsResponse{
+		Code: fiber.StatusOK,
+		Prompts: prompts,
 	})
 }

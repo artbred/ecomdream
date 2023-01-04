@@ -10,7 +10,7 @@ import (
 	"github.com/stripe/stripe-go/v73"
 )
 
-func checkoutSessionCompletedEvent(ctx *fiber.Ctx, event stripe.Event) error {
+func checkoutSessionCompleted(ctx *fiber.Ctx, event stripe.Event) error {
 	var stripeSession stripe.CheckoutSession
 
 	if err := json.Unmarshal(event.Data.Raw, &stripeSession); err != nil {

@@ -8,7 +8,7 @@ import (
 )
 
 func (j *VersionsJob) Logic() {
-	runningVersions, err := models.GetRunningVersions()
+	runningVersions, err := models.GetTrainingVersions()
 	if err != nil {
 		return
 	}

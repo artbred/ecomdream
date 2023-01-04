@@ -1,6 +1,7 @@
 package prompts
 
 import (
+	"ecomdream/src/domain/models"
 	"errors"
 	"github.com/gofiber/fiber/v2"
 )
@@ -18,6 +19,11 @@ type CreatePromptResponse struct {
 	ImagesLeft int `json:"images_left"`
 	PromptText string `json:"prompt_text"`
 	PromptNegative *string `json:"prompt_negative"`
+}
+
+type ListPromptsResponse struct {
+	Code int `json:"code"`
+	Prompts []models.Prompt `json:"prompts"`
 }
 
 func (r *CreatePromptRequest) Validate(ctx *fiber.Ctx) (err error) {

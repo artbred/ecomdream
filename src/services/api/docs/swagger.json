@@ -82,6 +82,38 @@
                 }
             }
         },
+        "/v1/prompts/list/{id}": {
+            "get": {
+                "description": "Returns prompts and images for version",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "prompts"
+                ],
+                "summary": "Returns prompts and images for version",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Version ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/prompts.CreatePromptRequest"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/versions/is-ready": {
             "get": {
                 "description": "Get status of version",

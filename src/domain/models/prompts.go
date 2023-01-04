@@ -14,19 +14,26 @@ type Prompt struct {
 
 	PromptText string `db:"prompt_text" json:"prompt"`
 	PromptNegative *string `db:"prompt_negative" json:"negative_prompt"`
-	AmountImages int `db:"amount_images" json:"num_outputs"`
-	Width int `db:"width" json:"width"`
-	Height int `db:"height" json:"height"`
-	PromptStrength float64 `db:"prompt_strength" json:"prompt_strength"`
-	InferenceSteps int `db:"inference_steps" json:"num_inference_steps"`
-	GuidanceScale float64 `db:"guidance_scale" json:"guidance_scale"`
-	Seed int `db:"seed" json:"seed"`
+	AmountImages int `db:"amount_images" json:"-"`
+	Width int `db:"width" json:"-"`
+	Height int `db:"height" json:"-"`
+	PromptStrength float64 `db:"prompt_strength" json:"-"`
+	InferenceSteps int `db:"inference_steps" json:"-"`
+	GuidanceScale float64 `db:"guidance_scale" json:"-"`
+	Seed int `db:"seed" json:"-"`
 
 	PredictionID string `db:"prediction_id" json:"-"`
 	PredictionTime *float64 `db:"prediction_time" json:"-"`
 
 	CreatedAt time.Time `db:"created_at" json:"-"`
 	FinishedAt *time.Time `db:"finished_at" json:"-"`
+
+	PromptImages PromptImages `db:"images" json:"images"`
+}
+
+type PromptExtendedInfo struct {
+	RunningPrompts bool `db:"has_running_prompts"`
+	Prompts []Prompt `db:"prompts"`
 }
 
 func (p *Prompt) TransferToReplicateBody(version *Version) (body []byte, err error) {
@@ -73,6 +80,22 @@ func (p *Prompt) Create() (err error) {
 	_, err = conn.NamedExec(query, p)
 	if err != nil {
 		logrus.WithError(err).Errorf("Can't create prompt %+v", p)
+	}
+
+	return
+}
+
+func GetCompletedPromptsForVersion(versionID string) (prompts []Prompt, err error) {
+	conn := postgres.Connection()
+
+	query := `SELECT *, (
+		SELECT json_agg(i) AS images FROM (
+			SELECT * FROM images GROUP BY images.id HAVING bool_or(prompt_id=prompts.id)
+		) i
+	) FROM prompts WHERE version_id=$1 AND finished_at IS NOT NULL ORDER BY prompts.created_at DESC`
+
+	err = conn.Select(&prompts, query, versionID); if err != nil {
+		logrus.WithError(err).Errorf("Can't get prompts for version %s", versionID)
 	}
 
 	return

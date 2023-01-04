@@ -85,7 +85,7 @@ func GetVersion(id string) (version *Version, err error) {
 	return
 }
 
-func GetRunningVersions() (versions []*Version, err error) {
+func GetTrainingVersions() (versions []*Version, err error) {
 	conn := postgres.Connection()
 
 	err = conn.Select(&versions, "SELECT * FROM versions WHERE pushed_at IS NULL")

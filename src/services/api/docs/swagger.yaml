@@ -95,6 +95,27 @@ paths:
       summary: Start prediction for prompt
       tags:
       - prompts
+  /v1/prompts/list/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Returns prompts and images for version
+      parameters:
+      - description: Version ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/prompts.CreatePromptRequest'
+      summary: Returns prompts and images for version
+      tags:
+      - prompts
   /v1/versions/is-ready:
     get:
       description: Get status of version

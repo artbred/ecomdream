@@ -135,16 +135,16 @@ func CreatePaymentLinkHandler(ctx *fiber.Ctx) error {
 
 		Discounts: discounts,
 
-		//Remove to capture automatically
 		PaymentIntentData: &stripe.CheckoutSessionPaymentIntentDataParams{
+			Description: stripe.String(payment.ID),
+			//Remove to capture automatically
 			CaptureMethod: stripe.String(string(stripe.PaymentIntentCaptureMethodManual)),
 		},
 
 		//AutomaticTax: stripe.Bool(true),
 	}
 
-	s, err := session.New(params)
-	if err != nil {
+	s, err := session.New(params); if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"code":    fiber.StatusInternalServerError,
 			"message": "Please try again later",
@@ -175,9 +175,9 @@ func WebhookListenerHandler(ctx *fiber.Ctx) error {
 
 	switch event.Type {
 	case "checkout.session.completed":
-		return checkoutSessionCompletedEvent(ctx, event)
-	case "checkout.session.expired":
-		return checkoutSessionExpired(ctx, event)
+		return checkoutSessionCompleted(ctx, event)
+	//case "checkout.session.expired":
+	//	return checkoutSessionExpired(ctx, event)
 	default:
 		return ctx.SendStatus(fiber.StatusOK)
 	}
