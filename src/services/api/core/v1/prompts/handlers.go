@@ -61,20 +61,6 @@ func CreatePromptForIDHandler(ctx *fiber.Ctx) error {
 		})
 	}
 
-	//hasRunningPrompts, err := version.HasRunningPrompts(); if err != nil {
-	//	return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-	//		"code":    fiber.StatusInternalServerError,
-	//		"message": "Please try again later",
-	//	})
-	//}
-	//
-	//if hasRunningPrompts {
-	//	return ctx.Status(fiber.StatusForbidden).JSON(fiber.Map{
-	//		"code":    fiber.StatusForbidden,
-	//		"message": "You have one prompt running, the max wait time is 5 minutes, please wait for it to complete",
-	//	})
-	//}
-
 	features, err := version.GetUnifiedFeatures(); if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"code":    fiber.StatusInternalServerError,
@@ -130,7 +116,7 @@ func CreatePromptForIDHandler(ctx *fiber.Ctx) error {
 		})
 	}
 
-	key := redisdb.BuildBlockReplicatePrediction(prompt.PredictionID)
+	key := redisdb.BuildFreezeReplicatePrediction(prompt.PredictionID)
 	rdb := redisdb.Connection()
 	rdb.SetNX(context.Background(), string(key), true, 5*time.Minute)
 	defer rdb.Del(context.Background(), string(key))
@@ -144,7 +130,7 @@ func CreatePromptForIDHandler(ctx *fiber.Ctx) error {
 		})
 	}
 
-	imagesGeneratedUrls, err := ReplicateToCloudflare(replicateOutResponse, prompt)
+	imagesGeneratedUrls, err := ReplicateImageToCloudflare(replicateOutResponse, prompt)
 	if err != nil || len(imagesGeneratedUrls) == 0 {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"code":    fiber.StatusInternalServerError,

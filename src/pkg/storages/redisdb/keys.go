@@ -29,6 +29,6 @@ func BuildFreezeEndpointKey(endpoint, id string) Key {
 	return Key(fmt.Sprintf("freeze_api_endpoint:%s:%s", endpoint, id))
 }
 
-func BuildBlockReplicatePrediction(predictionID string) Key {
+func BuildFreezeReplicatePrediction(predictionID string) Key {
 	return Key(fmt.Sprintf("block_replicate_prediction:%s", predictionID))
 }

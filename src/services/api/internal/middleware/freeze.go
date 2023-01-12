@@ -26,5 +26,6 @@ func FreezeEndpointForID(ctx *fiber.Ctx) error {
 
 	err := ctx.Next()
 	rdb.Del(context.Background(), string(key))
+
 	return err
 }

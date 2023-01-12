@@ -2,7 +2,7 @@ package redisdb
 
 import (
 	"context"
-	"ecomdream/src/pkg/configs"
+	"ecomdream/src/pkg/config"
 	"github.com/go-redis/redis/v8"
 	"github.com/sirupsen/logrus"
 	"sync"
@@ -20,7 +20,7 @@ func Connection() *redis.Client {
 }
 
 func Init() {
-	redisAddr, _ := configs.ConnectionURLBuilder("redis")
+	redisAddr, _ := config.ConnectionURLBuilder("redis")
 
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     redisAddr,

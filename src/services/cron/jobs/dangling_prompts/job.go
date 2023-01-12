@@ -1,7 +1,7 @@
 package dangling_prompts
 
 import (
-	"ecomdream/src/services/worker/logger"
+	"ecomdream/src/services/cron/logger"
 	"github.com/sirupsen/logrus"
 	"time"
 )

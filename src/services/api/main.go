@@ -1,7 +1,7 @@
 package main
 
 import (
-	"ecomdream/src/pkg/configs"
+	"ecomdream/src/pkg/config"
 	v1 "ecomdream/src/services/api/core/v1"
 	"ecomdream/src/services/api/internal/middleware"
 	"ecomdream/src/services/api/internal/server"
@@ -33,7 +33,7 @@ func main() {
 
 	SetupAPI(app.Group("/api"))
 
-	if configs.Debug {
+	if config.Debug {
 		server.StartServer(app)
 	} else {
 		server.StartServerWithGracefulShutdown(app)

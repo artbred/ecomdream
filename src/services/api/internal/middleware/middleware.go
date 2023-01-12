@@ -16,7 +16,7 @@ func SetupMiddleware(a *fiber.App) {
 		recover.New(),
 		pprof.New(),
 		helmet.New(),
-		InformOnInternalError,
+		ErrorMiddleware,
 	)
 }
 

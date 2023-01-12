@@ -29,7 +29,6 @@ func (j *VersionsJob) Logic() {
 			}
 		} else if time.Now().UTC().Sub(version.CreatedAt) >= 1*time.Hour {
 			j.logger.WithField("version_id", version.ID).Warning("Takes too long, need to check")
-			// TODO informer
 		}
 	}
 

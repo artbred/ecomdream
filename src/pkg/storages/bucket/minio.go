@@ -2,7 +2,7 @@ package bucket
 
 import (
 	"context"
-	"ecomdream/src/pkg/configs"
+	"ecomdream/src/pkg/config"
 	"fmt"
 	"github.com/joho/godotenv"
 	"github.com/minio/minio-go/v7"
@@ -68,7 +68,7 @@ func init() {
 	bucketName = os.Getenv("MINIO_BUCKET_NAME")
 	client = Client
 
-	if configs.Debug {
+	if config.Debug {
 		basePath = "dev"
 	}
 }

@@ -2,7 +2,7 @@ package informer
 
 import (
 	"bytes"
-	"ecomdream/src/pkg/configs"
+	"ecomdream/src/pkg/config"
 	"encoding/json"
 	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
@@ -12,7 +12,6 @@ import (
 
 const (
 	SendTelegramMessageEndpoint string = "/telegram/send-message"
-	CallEndpoint                string = "/call"
 )
 
 type (
@@ -34,8 +33,13 @@ type (
 	Client struct {
 		BaseURL string
 	}
+)
 
-	Level string
+type Level string
+
+const (
+	PaymentsLevel = Level("payments")
+	InternalLevel = Level("internal")
 )
 
 var (
@@ -44,12 +48,11 @@ var (
 )
 
 func SendTelegramMessage(message string, level Level) {
-	if configs.Debug {
+	if config.Debug {
 		return
 	}
 
-	token, ok := informerTokens[level]
-	if !ok {
+	token, ok := informerTokens[level]; if !ok {
 		logrus.Warningf("Token for level %s is not set", level)
 		return
 	}
@@ -88,8 +91,8 @@ func init() {
 	}
 
 	informerTokens = map[Level]string{
-		"payments": os.Getenv("INFORMER_PAYMENTS_TOKEN"),
-		"internal": os.Getenv("INFORMER_INTERNAL_TOKEN"),
+		PaymentsLevel: os.Getenv("INFORMER_PAYMENTS_TOKEN"),
+		InternalLevel: os.Getenv("INFORMER_INTERNAL_TOKEN"),
 	}
 
 	baseURL = os.Getenv("INFORMER_BASE_URL")

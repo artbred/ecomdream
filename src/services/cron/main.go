@@ -1,8 +1,8 @@
 package main
 
 import (
-	"ecomdream/src/services/worker/jobs/dangling_prompts"
-	"ecomdream/src/services/worker/jobs/push_versions"
+	"ecomdream/src/services/cron/jobs/dangling_prompts"
+	"ecomdream/src/services/cron/jobs/push_versions"
 	"time"
 )
 

@@ -36,8 +36,7 @@ func UploadImageByURL(imageFromURL ImageUploadRequestByURL) (imageResponse *clou
 		}
 	}
 
-	err = w.Close()
-	if err != nil {
+	err = w.Close(); if err != nil {
 		return nil, fmt.Errorf("cloudflare write multipart, %w", err)
 	}
 

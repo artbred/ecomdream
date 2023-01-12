@@ -1,7 +1,7 @@
 package postgres
 
 import (
-	"ecomdream/src/pkg/configs"
+	"ecomdream/src/pkg/config"
 	_ "github.com/jackc/pgx/stdlib"
 	"github.com/jmoiron/sqlx"
 	"github.com/sirupsen/logrus"
@@ -23,7 +23,7 @@ func Connection() *sqlx.DB {
 func Init() {
 	var err error
 
-	databaseUrl, _ = configs.ConnectionURLBuilder("postgres")
+	databaseUrl, _ = config.ConnectionURLBuilder("postgres")
 
 	database, err = sqlx.Connect("pgx", databaseUrl)
 	if err != nil {

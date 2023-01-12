@@ -1,7 +1,7 @@
 package server
 
 import (
-	"ecomdream/src/pkg/configs"
+	"ecomdream/src/pkg/config"
 	"github.com/gofiber/fiber/v2"
 	"github.com/sirupsen/logrus"
 	"log"
@@ -9,7 +9,7 @@ import (
 	"os/signal"
 )
 
-//TODO clear redis
+// TODO clear redis
 func StartServerWithGracefulShutdown(a *fiber.App) {
 	idleConnClosed := make(chan struct{})
 
@@ -25,7 +25,7 @@ func StartServerWithGracefulShutdown(a *fiber.App) {
 		close(idleConnClosed)
 	}()
 
-	fiberConnURL, _ := configs.ConnectionURLBuilder("fiber")
+	fiberConnURL, _ := config.ConnectionURLBuilder("fiber")
 
 	if err := a.Listen(fiberConnURL); err != nil {
 		log.Printf("Oops... Server is not running! Reason: %v", err)
@@ -35,7 +35,7 @@ func StartServerWithGracefulShutdown(a *fiber.App) {
 }
 
 func StartServer(a *fiber.App) {
-	fiberConnURL, _ := configs.ConnectionURLBuilder("fiber")
+	fiberConnURL, _ := config.ConnectionURLBuilder("fiber")
 
 	if err := a.Listen(fiberConnURL); err != nil {
 		log.Printf("Oops... Server is not running! Reason: %v", err)

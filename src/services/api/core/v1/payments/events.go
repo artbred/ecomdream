@@ -50,30 +50,3 @@ func checkoutSessionCompleted(ctx *fiber.Ctx, event stripe.Event) error {
 
 	return ctx.SendStatus(fiber.StatusOK)
 }
-
-func checkoutSessionExpired(ctx *fiber.Ctx, event stripe.Event) error {
-	var stripeSession stripe.CheckoutSession
-
-	if err := json.Unmarshal(event.Data.Raw, &stripeSession); err != nil {
-		logrus.Error(err)
-		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": err.Error(),
-		})
-	}
-
-	payment, err := models.GetPayment(stripeSession.ClientReferenceID)
-	if err != nil {
-		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": err.Error(),
-		})
-	}
-
-	if payment == nil {
-		logrus.Warningf("Unknow payment id %s", stripeSession.ClientReferenceID)
-		return ctx.SendStatus(fiber.StatusOK)
-	}
-
-	go payment.Delete()
-
-	return ctx.SendStatus(fiber.StatusOK)
-}

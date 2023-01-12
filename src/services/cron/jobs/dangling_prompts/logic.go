@@ -13,16 +13,16 @@ func (j *PromptsJob) Logic() {
 		return
 	}
 
-	counterUnblocked := 0
+	counterAccessible := 0
 	counterPushed := 0
 
 	for _, prompt := range runningPrompts {
-		key := redisdb.BuildBlockReplicatePrediction(prompt.PredictionID)
+		key := redisdb.BuildFreezeReplicatePrediction(prompt.PredictionID)
 		if key.IsBlocked() {
 			continue
 		}
 
-		counterUnblocked++
+		counterAccessible++
 
 		result, err := replicate.CheckPrediction(context.Background(), prompt.PredictionID)
 		if err != nil {
@@ -34,11 +34,11 @@ func (j *PromptsJob) Logic() {
 			continue
 		}
 
-		_, err = prompts.ReplicateToCloudflare(result, prompt)
+		_, err = prompts.ReplicateImageToCloudflare(result, prompt)
 		if err == nil  {
 			counterPushed++
 		}
 	}
 
-	j.logger.Infof("Pushed %d/%d prompts", counterPushed, counterUnblocked)
+	j.logger.Infof("Pushed %d/%d prompts", counterPushed, counterAccessible)
 }

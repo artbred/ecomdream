@@ -2,7 +2,7 @@ package payments
 
 import (
 	"ecomdream/src/domain/models"
-	"ecomdream/src/pkg/configs"
+	"ecomdream/src/pkg/config"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/sirupsen/logrus"
@@ -137,8 +137,6 @@ func CreatePaymentLinkHandler(ctx *fiber.Ctx) error {
 
 		PaymentIntentData: &stripe.CheckoutSessionPaymentIntentDataParams{
 			Description: stripe.String(payment.ID),
-			//Remove to capture automatically
-			CaptureMethod: stripe.String(string(stripe.PaymentIntentCaptureMethodManual)),
 		},
 
 		//AutomaticTax: stripe.Bool(true),
@@ -165,7 +163,7 @@ func CreatePaymentLinkHandler(ctx *fiber.Ctx) error {
 }
 
 func WebhookListenerHandler(ctx *fiber.Ctx) error {
-	event, err := webhook.ConstructEvent(ctx.Request().Body(), string(ctx.Request().Header.Peek("Stripe-Signature")), configs.StripeWebhookSecret)
+	event, err := webhook.ConstructEvent(ctx.Request().Body(), string(ctx.Request().Header.Peek("Stripe-Signature")), config.StripeWebhookSecret)
 	if err != nil {
 		logrus.Error(err)
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -176,13 +174,11 @@ func WebhookListenerHandler(ctx *fiber.Ctx) error {
 	switch event.Type {
 	case "checkout.session.completed":
 		return checkoutSessionCompleted(ctx, event)
-	//case "checkout.session.expired":
-	//	return checkoutSessionExpired(ctx, event)
 	default:
 		return ctx.SendStatus(fiber.StatusOK)
 	}
 }
 
 func init() {
-	stripe.Key = configs.StripeSecretKey
+	stripe.Key = config.StripeSecretKey
 }
