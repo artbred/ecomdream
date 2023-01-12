@@ -7,5 +7,5 @@ import (
 
 func Init(router fiber.Router) {
 	router.Use(middleware.FreezeEndpointForID).Post("/train/:id", TrainVersionHandler)
-	router.Get("/is-ready", IsReadyHandler)
+	router.Get("/info/:id", VersionInfoHandler)
 }

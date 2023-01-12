@@ -14,7 +14,7 @@ type Prompt struct {
 
 	PromptText string `db:"prompt_text" json:"prompt"`
 	PromptNegative *string `db:"prompt_negative" json:"negative_prompt"`
-	AmountImages int `db:"amount_images" json:"-"`
+	AmountImages int `db:"amount_images" json:"num_outputs"`
 	Width int `db:"width" json:"-"`
 	Height int `db:"height" json:"-"`
 	PromptStrength float64 `db:"prompt_strength" json:"-"`
@@ -29,11 +29,6 @@ type Prompt struct {
 	FinishedAt *time.Time `db:"finished_at" json:"-"`
 
 	PromptImages PromptImages `db:"images" json:"images"`
-}
-
-type PromptExtendedInfo struct {
-	RunningPrompts bool `db:"has_running_prompts"`
-	Prompts []Prompt `db:"prompts"`
 }
 
 func (p *Prompt) TransferToReplicateBody(version *Version) (body []byte, err error) {

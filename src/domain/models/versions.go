@@ -31,6 +31,11 @@ type Version struct {
 	AmountImagesGenerated int `db:"amount_images_generated"`
 }
 
+type VersionExtendedInfo struct {
+	AmountImagesGenerated int `db:"amount_images_generated" json:"amount_images_generated"`
+	Features
+}
+
 func (v *Version) Create(payment *Payment) (err error) {
 	conn := postgres.Connection()
 
@@ -141,15 +146,21 @@ func (v *Version) GetImages() (images []Image, err error) {
 	return
 }
 
-func (v *Version) HasRunningPrompts() (exists bool, err error) {
+func (v *Version) LoadExtendedInfo() (info VersionExtendedInfo, err error) {
 	conn := postgres.Connection()
 
-	query := `select exists (select 1 from prompts
-			where version_id=$1
-		  	and finished_at is null and created_at + interval '5 minute' > now())`
+	query := `
+		SELECT SUM(DISTINCT plans.feature_amount_images) as feature_amount_images, SUM(DISTINCT plans.feature_amount_image_to_prompt) as feature_amount_image_to_prompt, COUNT(DISTINCT images.id) as amount_images_generated
+		FROM payments
+		JOIN plans ON payments.plan_id = plans.id
+		JOIN prompts ON payments.version_id = prompts.version_id
+		JOIN images ON prompts.id = images.prompt_id
+		WHERE payments.paid_at IS NOT NULL AND payments.version_id = $1
+	`
 
-	err = conn.Get(&exists, query, v.ID); if err != nil {
-		logrus.WithError(err).Errorf("Can't identify if version %s has running prompts", v.ID)
+	err = conn.Get(&info, query, v.ID)
+	if err != nil {
+		logrus.WithError(err).Errorf("can't get extended info for version %s", v.ID)
 	}
 
 	return

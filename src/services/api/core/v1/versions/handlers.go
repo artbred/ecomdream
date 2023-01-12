@@ -9,6 +9,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/sirupsen/logrus"
 	"github.com/twinj/uuid"
+	"time"
 )
 
 // TrainVersionHandler handler that accepts data for training
@@ -23,14 +24,14 @@ import (
 // @Success 201 {object} TrainVersionResponse
 // @Router /v1/versions/train/{id} [post]
 func TrainVersionHandler(ctx *fiber.Ctx) error {
-	paymentID := ctx.Query("id"); if len(paymentID) <= 0 {
+	paymentID := ctx.Params("id"); if len(paymentID) == 0 {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"code":    fiber.StatusBadRequest,
 			"message": "Provide payment id",
 		})
 	}
 
-	class := ctx.Query("class"); if len(class) <= 0 {
+	class := ctx.Query("class"); if len(class) == 0 {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"code":    fiber.StatusBadRequest,
 			"message": "Provide class",
@@ -73,16 +74,14 @@ func TrainVersionHandler(ctx *fiber.Ctx) error {
 		})
 	}
 
-	form, err := ctx.MultipartForm()
-	if err != nil {
+	form, err := ctx.MultipartForm();if err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"code":    fiber.StatusBadRequest,
 			"message": err.Error(),
 		})
 	}
 
-	zip, err := convertImagesToZip(form)
-	if err != nil {
+	zip, err := convertImagesToZip(form); if err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"code":    fiber.StatusBadRequest,
 			"message": err.Error(),
@@ -99,7 +98,6 @@ func TrainVersionHandler(ctx *fiber.Ctx) error {
 	}
 
 	inputData := replicate.ConstructDreamBoothInputs(class, zipURL, replicate.TrainerVersion)
-
 	replicateRes, err := replicate.StartDreamBoothTraining(context.Background(), inputData)
 	if err != nil {
 		logrus.WithField("payment_id", payment.ID).Error(err)
@@ -140,24 +138,23 @@ func TrainVersionHandler(ctx *fiber.Ctx) error {
 	})
 }
 
-// IsReadyHandler handler that sends status of version
-// @Description Get status of version
-// @Summary Get status of version
+// VersionInfoHandler handler that sends info about version
+// @Description Get info about version
+// @Summary Get info about version
 // @Tags versions
 // @Produce json
-// @Param version_id query string true "Version ID"
-// @Success 200 {object} IsReadyResponse
-// @Router /v1/versions/is-ready [get]
-func IsReadyHandler(ctx *fiber.Ctx) error {
-	id := ctx.Query("version_id"); if len(id) <= 0 {
+// @Param id path string true "Version ID"
+// @Success 200 {object} VersionInfoResponse
+// @Router /v1/versions/info/{id} [get]
+func VersionInfoHandler(ctx *fiber.Ctx) error {
+	id := ctx.Params("id"); if len(id) == 0 {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"code":    fiber.StatusBadRequest,
 			"message": "Provide version id",
 		})
 	}
 
-	version, err := models.GetVersion(id)
-	if err != nil {
+	version, err := models.GetVersion(id); if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"code":    fiber.StatusInternalServerError,
 			"message": "Please try again later",
@@ -171,12 +168,26 @@ func IsReadyHandler(ctx *fiber.Ctx) error {
 		})
 	}
 
-	isReady := true; if version.PushedAt == nil {
-		isReady = false
+	if version.PushedAt == nil {
+		return ctx.Status(fiber.StatusOK).JSON(VersionInfoResponse{
+			Code:         fiber.StatusOK,
+			IsReady:      false,
+			TimeTraining: time.Now().UTC().Sub(version.CreatedAt).String(),
+			Info:         nil,
+		})
 	}
 
-	return ctx.Status(fiber.StatusOK).JSON(IsReadyResponse{
-		Code:    fiber.StatusOK,
-		IsReady: isReady,
+	info, err := version.LoadExtendedInfo(); if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"code":    fiber.StatusInternalServerError,
+			"message": "Please try again later",
+		})
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(VersionInfoResponse{
+		Code: fiber.StatusOK,
+		IsReady: true,
+		TimeTraining: version.PushedAt.Sub(version.CreatedAt).String(),
+		Info: info,
 	})
 }

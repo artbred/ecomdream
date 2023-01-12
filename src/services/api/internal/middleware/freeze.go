@@ -7,8 +7,11 @@ import (
 	"time"
 )
 
+//TODO ctx.Params("id")
+// or duplicate code inside each handlers
+
 func FreezeEndpointForID(ctx *fiber.Ctx) error {
-	id := string(ctx.Request().URI().LastPathSegment()); if len(id) == 0 { //TODO ctx.Params("id")
+	id := string(ctx.Request().URI().LastPathSegment()); if len(id) == 0 {
 		return ctx.Next()
 	}
 

@@ -8,8 +8,8 @@ import (
 )
 
 type Features struct {
-	FeatureAmountImages        int `db:"feature_amount_images"`
-	FeatureAmountImageToPrompt int `db:"feature_amount_image_to_prompt"`
+	FeatureAmountImages        int `db:"feature_amount_images" json:"feature_amount_images"`
+	FeatureAmountImageToPrompt int `db:"feature_amount_image_to_prompt" json:"feature_amount_image_to_prompt"` // TODO https://replicate.com/methexis-inc/img2prompt
 }
 
 type Plan struct {

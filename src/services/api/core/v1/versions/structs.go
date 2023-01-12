@@ -6,7 +6,9 @@ type TrainVersionResponse struct {
 	VersionID string `json:"version_id"`
 }
 
-type IsReadyResponse struct {
+type VersionInfoResponse struct {
 	Code int `json:"code"`
 	IsReady bool `json:"is_ready"`
+	TimeTraining string `json:"time_training"`
+	Info interface{}`json:"info"`
 }

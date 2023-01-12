@@ -123,22 +123,22 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/versions/is-ready": {
+        "/v1/versions/info/{id}": {
             "get": {
-                "description": "Get status of version",
+                "description": "Get info about version",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "versions"
                 ],
-                "summary": "Get status of version",
+                "summary": "Get info about version",
                 "parameters": [
                     {
                         "type": "string",
                         "description": "Version ID",
-                        "name": "version_id",
-                        "in": "query",
+                        "name": "id",
+                        "in": "path",
                         "required": true
                     }
                 ],
@@ -146,7 +146,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/versions.IsReadyResponse"
+                            "$ref": "#/definitions/versions.VersionInfoResponse"
                         }
                     }
                 }
@@ -242,17 +242,6 @@ const docTemplate = `{
                 }
             }
         },
-        "versions.IsReadyResponse": {
-            "type": "object",
-            "properties": {
-                "code": {
-                    "type": "integer"
-                },
-                "is_ready": {
-                    "type": "boolean"
-                }
-            }
-        },
         "versions.TrainVersionResponse": {
             "type": "object",
             "properties": {
@@ -263,6 +252,21 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "version_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "versions.VersionInfoResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "info": {},
+                "is_ready": {
+                    "type": "boolean"
+                },
+                "time_training": {
                     "type": "string"
                 }
             }

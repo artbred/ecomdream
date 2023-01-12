@@ -9,33 +9,31 @@ import (
 	"sync"
 )
 
-
 func ReplicateImageToCloudflare(replicateOutResponse *replicate.Response, prompt *models.Prompt) ([]string, error) {
 	var imagesGeneratedUrls []string
 	var wg sync.WaitGroup
 
-	imageChan := make(chan *models.Image)
+	imageChan := make(chan *models.Image, len(replicateOutResponse.Output))
 
 	for _, imageReplicate := range replicateOutResponse.Output {
 		wg.Add(1)
 		go func(prompt *models.Prompt, imageReplicate string) {
 			defer wg.Done()
-			imageChan <- replicateImageToCloudflare(prompt, imageReplicate)
+			image := replicateImageToCloudflare(prompt, imageReplicate)
+			if image != nil {
+				imageChan <- image
+			}
 		}(prompt, imageReplicate)
 	}
 
 	go func() {
-		for i := 0; i < len(replicateOutResponse.Output); i++ {
-			select {
-			case image := <-imageChan:
-				if image != nil {
-					imagesGeneratedUrls = append(imagesGeneratedUrls, image.CdnURL)
-				}
-			}
-		}
+		wg.Wait()
+		close(imageChan)
 	}()
 
-	wg.Wait()
+	for image := range imageChan {
+		imagesGeneratedUrls = append(imagesGeneratedUrls, image.CdnURL)
+	}
 
 	prompt.PredictionTime = &replicateOutResponse.Metrics.PredictTime
 	return imagesGeneratedUrls, prompt.MarkAsFinished()

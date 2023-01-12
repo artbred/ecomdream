@@ -25,13 +25,6 @@ definitions:
       prompt:
         type: string
     type: object
-  versions.IsReadyResponse:
-    properties:
-      code:
-        type: integer
-      is_ready:
-        type: boolean
-    type: object
   versions.TrainVersionResponse:
     properties:
       code:
@@ -39,6 +32,16 @@ definitions:
       message:
         type: string
       version_id:
+        type: string
+    type: object
+  versions.VersionInfoResponse:
+    properties:
+      code:
+        type: integer
+      info: {}
+      is_ready:
+        type: boolean
+      time_training:
         type: string
     type: object
 info:
@@ -116,13 +119,13 @@ paths:
       summary: Returns prompts and images for version
       tags:
       - prompts
-  /v1/versions/is-ready:
+  /v1/versions/info/{id}:
     get:
-      description: Get status of version
+      description: Get info about version
       parameters:
       - description: Version ID
-        in: query
-        name: version_id
+        in: path
+        name: id
         required: true
         type: string
       produces:
@@ -131,8 +134,8 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/versions.IsReadyResponse'
-      summary: Get status of version
+            $ref: '#/definitions/versions.VersionInfoResponse'
+      summary: Get info about version
       tags:
       - versions
   /v1/versions/train/{id}:
