@@ -37,6 +37,9 @@ rebuild:
 up: rebuild
 	docker-compose up -d --remove-orphans
 
+.PHONY: protobuf
+protobuf:
+	protoc -I src/contracts/ src/contracts/*.proto --go_out=src/contracts --go-grpc_out=require_unimplemented_servers=false:src/contracts
 
 .PHONY: docs
 docs:

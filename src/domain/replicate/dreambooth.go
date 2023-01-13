@@ -39,7 +39,7 @@ type DreamBoothResponse struct {
 
 var (
 	MaxTrainingSteps int64 = 2000
-	ModelName        string
+	ModelName = "artbred/ecomdream"
 	UniqueIdentifier = "xjy"
 )
 
@@ -127,5 +127,4 @@ func StartDreamBoothTraining(ctx context.Context, modelRequest DreamBoothRequest
 
 func init() {
 	MaxTrainingSteps, _ = strconv.ParseInt(os.Getenv("MAX_TRAINING_STEPS"), 10, 64)
-	ModelName = os.Getenv("REPLICATE_MODEL_NAME")
 }

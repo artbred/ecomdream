@@ -26,10 +26,8 @@ func ReplicateImageToCloudflare(replicateOutResponse *replicate.Response, prompt
 		}(prompt, imageReplicate)
 	}
 
-	go func() {
-		wg.Wait()
-		close(imageChan)
-	}()
+	wg.Wait()
+	close(imageChan)
 
 	for image := range imageChan {
 		imagesGeneratedUrls = append(imagesGeneratedUrls, image.CdnURL)

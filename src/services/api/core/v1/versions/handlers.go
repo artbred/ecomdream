@@ -81,12 +81,17 @@ func TrainVersionHandler(ctx *fiber.Ctx) error {
 		})
 	}
 
-	zip, err := convertImagesToZip(form); if err != nil {
+	start := time.Now()
+
+	zip, err := processImagesToZip(form); if err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"code":    fiber.StatusBadRequest,
 			"message": err.Error(),
 		})
 	}
+
+	logrus.Print(time.Now().Sub(start))
+	return nil
 
 	zipURL, err := bucket.Upload(fmt.Sprintf("%s.zip", payment.ID), zip, int64(zip.Len()), "application/zip")
 	if err != nil {

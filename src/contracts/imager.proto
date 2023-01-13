@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package contracts;
+option go_package = ".;contracts";
+
+
+
+service ImageService {
+    rpc ValidateAndResizeImages (ValidateAndResizeImagesRequest) returns (ValidateAndResizeImagesResponse) {}
+}
+
+message ValidateAndResizeImagesRequest {
+    repeated Image images = 1;
+}
+
+message ValidateAndResizeImagesResponse {
+    repeated Image images = 1;
+}
+
+message Image {
+    string id = 1;
+    string content_type = 2;
+    string error = 3;
+    bytes data = 4;
+}
