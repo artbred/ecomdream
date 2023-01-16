@@ -12,6 +12,8 @@ import (
 	"github.com/twinj/uuid"
 )
 
+type handler struct {}
+
 // CreatePaymentLinkHandler handler that creates payment link
 // @Description Create payment link
 // @Summary Create payment link
@@ -21,7 +23,7 @@ import (
 // @Param payment_data body CreatePaymentLinkRequest true "Payment data"
 // @Success 201 {object} CreatePaymentLinkResponse
 // @Router /v1/payments/create [post]
-func CreatePaymentLinkHandler(ctx *fiber.Ctx) error {
+func (h *handler) CreatePaymentLinkHandler(ctx *fiber.Ctx) error {
 	req := &CreatePaymentLinkRequest{}
 
 	if err := req.Validate(ctx); err != nil {
@@ -39,17 +41,11 @@ func CreatePaymentLinkHandler(ctx *fiber.Ctx) error {
 		})
 	}
 
-	if plan == nil {
+	// it's safe
+	if plan == nil || plan.IsDeprecated {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"code":    fiber.StatusBadRequest,
 			"message": "Invalid plan id",
-		})
-	}
-
-	if plan.IsDeprecated {
-		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"code":    fiber.StatusBadRequest,
-			"message": "Plan is deprecated",
 		})
 	}
 
@@ -162,7 +158,16 @@ func CreatePaymentLinkHandler(ctx *fiber.Ctx) error {
 	})
 }
 
-func WebhookListenerHandler(ctx *fiber.Ctx) error {
+// WebhookListenerHandler webhook for stripe
+// @Description Webhook for stripe
+// @Summary Webhook for stripe
+// @Tags payments
+// @Accept json
+// @Produce json
+// @Param payment_data body CreatePaymentLinkRequest true "Payment data"
+// @Success 201 {object} CreatePaymentLinkResponse
+// @Router /v1/payments/webhook [post]
+func (h *handler) WebhookListenerHandler(ctx *fiber.Ctx) error {
 	event, err := webhook.ConstructEvent(ctx.Request().Body(), string(ctx.Request().Header.Peek("Stripe-Signature")), config.StripeWebhookSecret)
 	if err != nil {
 		logrus.Error(err)
@@ -177,6 +182,10 @@ func WebhookListenerHandler(ctx *fiber.Ctx) error {
 	default:
 		return ctx.SendStatus(fiber.StatusOK)
 	}
+}
+
+func createHandler() *handler {
+	return &handler{}
 }
 
 func init() {

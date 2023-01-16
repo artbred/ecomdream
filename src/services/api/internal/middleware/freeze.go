@@ -7,8 +7,7 @@ import (
 	"time"
 )
 
-//TODO ctx.Params("id")
-// or duplicate code inside each handlers
+//TODO ctx.Params("id") does not work because it is init before endpoint
 
 func FreezeEndpointForID(ctx *fiber.Ctx) error {
 	id := string(ctx.Request().URI().LastPathSegment()); if len(id) == 0 {
@@ -18,7 +17,7 @@ func FreezeEndpointForID(ctx *fiber.Ctx) error {
 	key := redisdb.BuildFreezeEndpointKey(string(ctx.Request().URI().Path()), id)
 	rdb := redisdb.Connection()
 
-	if key.IsBlocked() {
+	if key.IsFrozen() {
 		return ctx.Status(fiber.StatusForbidden).JSON(fiber.Map{
 			"code":    fiber.StatusForbidden,
 			"message": "You have running task, please wait for it to complete, maximum wait time is 5 minutes",

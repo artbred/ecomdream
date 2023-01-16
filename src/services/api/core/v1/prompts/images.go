@@ -9,7 +9,7 @@ import (
 	"sync"
 )
 
-func ReplicateImageToCloudflare(replicateOutResponse *replicate.Response, prompt *models.Prompt) ([]string, error) {
+func TransferReplicateImagesToCloudflareAndSave(replicateOutResponse *replicate.Response, prompt *models.Prompt) ([]string, error) {
 	var imagesGeneratedUrls []string
 	var wg sync.WaitGroup
 

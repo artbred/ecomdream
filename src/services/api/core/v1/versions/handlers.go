@@ -12,6 +12,8 @@ import (
 	"time"
 )
 
+type handler struct {}
+
 // TrainVersionHandler handler that accepts data for training
 // @Description Start training process
 // @Summary Start training process
@@ -23,7 +25,7 @@ import (
 // @Param data formData []file true "Data"
 // @Success 201 {object} TrainVersionResponse
 // @Router /v1/versions/train/{id} [post]
-func TrainVersionHandler(ctx *fiber.Ctx) error {
+func (h *handler) TrainVersionHandler(ctx *fiber.Ctx) error {
 	paymentID := ctx.Params("id"); if len(paymentID) == 0 {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"code":    fiber.StatusBadRequest,
@@ -151,7 +153,7 @@ func TrainVersionHandler(ctx *fiber.Ctx) error {
 // @Param id path string true "Version ID"
 // @Success 200 {object} VersionInfoResponse
 // @Router /v1/versions/info/{id} [get]
-func VersionInfoHandler(ctx *fiber.Ctx) error {
+func (h *handler) VersionInfoHandler(ctx *fiber.Ctx) error {
 	id := ctx.Params("id"); if len(id) == 0 {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"code":    fiber.StatusBadRequest,
@@ -195,4 +197,8 @@ func VersionInfoHandler(ctx *fiber.Ctx) error {
 		TimeTraining: version.PushedAt.Sub(version.CreatedAt).String(),
 		Info: info,
 	})
+}
+
+func createHandler() *handler {
+	return &handler{}
 }

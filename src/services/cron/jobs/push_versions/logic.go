@@ -13,7 +13,7 @@ func (j *VersionsJob) Logic() {
 		return
 	}
 
-	countFinished := 0
+	counterFinished := 0
 
 	for _, version := range runningVersions {
 		res, err := replicate.CheckDreamBoothTraining(context.Background(), version.PredictionID)
@@ -25,12 +25,12 @@ func (j *VersionsJob) Logic() {
 		if res.Status == "succeeded" && res.Version != nil {
 			err := version.MarkAsPushed(res.Version)
 			if err == nil {
-				countFinished++
+				counterFinished++
 			}
 		} else if time.Now().UTC().Sub(version.CreatedAt) >= 1*time.Hour {
 			j.logger.WithField("version_id", version.ID).Warning("Takes too long, need to check")
 		}
 	}
 
-	j.logger.Infof("Marked %d/%d versions as pushed", countFinished, len(runningVersions))
+	j.logger.Infof("Marked %d/%d versions as pushed", counterFinished, len(runningVersions))
 }

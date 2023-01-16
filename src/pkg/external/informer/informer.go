@@ -80,8 +80,6 @@ func SendTelegramMessage(message string, level Level) {
 	if res.StatusCode == http.StatusCreated {
 		return
 	}
-
-	logrus.Error("informer unsuccessfully")
 }
 
 func init() {

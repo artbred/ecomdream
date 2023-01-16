@@ -6,6 +6,7 @@ import (
 	"ecomdream/src/domain/replicate"
 	"ecomdream/src/pkg/storages/redisdb"
 	"ecomdream/src/services/api/core/v1/prompts"
+	"github.com/sirupsen/logrus"
 )
 
 func (j *PromptsJob) Logic() {
@@ -13,16 +14,16 @@ func (j *PromptsJob) Logic() {
 		return
 	}
 
-	counterAccessible := 0
-	counterPushed := 0
+	counterRunningPrompts := len(runningPrompts)
+	counterAccessiblePrompts, counterPushedPrompts := 0, 0
 
 	for _, prompt := range runningPrompts {
 		key := redisdb.BuildFreezeReplicatePrediction(prompt.PredictionID)
-		if key.IsBlocked() {
+		if key.IsFrozen() {
 			continue
 		}
 
-		counterAccessible++
+		counterAccessiblePrompts++
 
 		result, err := replicate.CheckPrediction(context.Background(), prompt.PredictionID)
 		if err != nil {
@@ -34,11 +35,13 @@ func (j *PromptsJob) Logic() {
 			continue
 		}
 
-		_, err = prompts.ReplicateImageToCloudflare(result, prompt)
+		_, err = prompts.TransferReplicateImagesToCloudflareAndSave(result, prompt)
 		if err == nil  {
-			counterPushed++
+			counterPushedPrompts++
+		} else {
+			logrus.WithError(err).Error("can't transfer ")
 		}
 	}
 
-	j.logger.Infof("Pushed %d/%d prompts", counterPushed, counterAccessible)
+	j.logger.Infof("Pushed %d/%d prompts, from %d prompts", counterAccessiblePrompts, counterAccessiblePrompts, counterRunningPrompts)
 }

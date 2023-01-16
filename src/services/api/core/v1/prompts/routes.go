@@ -7,6 +7,8 @@ import (
 
 
 func Init(router fiber.Router) {
-	router.Use(middleware.FreezeEndpointForID).Post("/create/:id", CreatePromptForIDHandler)
-	router.Get("/list/:id", ListPromptsForIDHandler)
+	h := createHandler()
+
+	router.Use(middleware.FreezeEndpointForID).Post("/create/:id", h.CreatePromptForIDHandler)
+	router.Get("/list/:id", h.ListPromptsForIDHandler)
 }

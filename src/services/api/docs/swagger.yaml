@@ -71,6 +71,28 @@ paths:
       summary: Create payment link
       tags:
       - payments
+  /v1/payments/webhook:
+    post:
+      consumes:
+      - application/json
+      description: Webhook for stripe
+      parameters:
+      - description: Payment data
+        in: body
+        name: payment_data
+        required: true
+        schema:
+          $ref: '#/definitions/payments.CreatePaymentLinkRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/payments.CreatePaymentLinkResponse'
+      summary: Webhook for stripe
+      tags:
+      - payments
   /v1/prompts/create/{id}:
     post:
       consumes:

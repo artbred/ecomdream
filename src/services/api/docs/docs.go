@@ -50,6 +50,40 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/payments/webhook": {
+            "post": {
+                "description": "Webhook for stripe",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "payments"
+                ],
+                "summary": "Webhook for stripe",
+                "parameters": [
+                    {
+                        "description": "Payment data",
+                        "name": "payment_data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/payments.CreatePaymentLinkRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/payments.CreatePaymentLinkResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/prompts/create/{id}": {
             "post": {
                 "description": "Start prediction for prompt",

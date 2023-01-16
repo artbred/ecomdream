@@ -9,10 +9,10 @@ import (
 
 type Key string
 
-func (k Key) IsBlocked() bool {
+func (k Key) IsFrozen() bool {
 	rdb := Connection()
 
-	isBlocked, err := rdb.Get(context.Background(), string(k)).Bool()
+	isFrozen, err := rdb.Get(context.Background(), string(k)).Bool()
 	if err != nil {
 		if err == redis.Nil {
 			return false
@@ -22,7 +22,7 @@ func (k Key) IsBlocked() bool {
 		}
 	}
 
-	return isBlocked
+	return isFrozen
 }
 
 func BuildFreezeEndpointKey(endpoint, id string) Key {
@@ -30,5 +30,5 @@ func BuildFreezeEndpointKey(endpoint, id string) Key {
 }
 
 func BuildFreezeReplicatePrediction(predictionID string) Key {
-	return Key(fmt.Sprintf("block_replicate_prediction:%s", predictionID))
+	return Key(fmt.Sprintf("freeze_replicate_prediction:%s", predictionID))
 }

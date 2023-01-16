@@ -12,6 +12,8 @@ import (
 	"time"
 )
 
+type handler struct {}
+
 // CreatePromptForIDHandler handler that start prediction for model
 // @Description Start prediction for prompt
 // @Summary Start prediction for prompt
@@ -22,7 +24,7 @@ import (
 // @Param prompt_data body CreatePromptRequest true "Prompt data"
 // @Success 201 {object} CreatePromptRequest
 // @Router /v1/prompts/create/{id} [post]
-func CreatePromptForIDHandler(ctx *fiber.Ctx) error {
+func (h *handler) CreatePromptForIDHandler(ctx *fiber.Ctx) error {
 	req := &CreatePromptRequest{}
 
 	if err := req.Validate(ctx); err != nil {
@@ -130,7 +132,7 @@ func CreatePromptForIDHandler(ctx *fiber.Ctx) error {
 		})
 	}
 
-	imagesGeneratedUrls, err := ReplicateImageToCloudflare(replicateOutResponse, prompt)
+	imagesGeneratedUrls, err := TransferReplicateImagesToCloudflareAndSave(replicateOutResponse, prompt)
 	if err != nil || len(imagesGeneratedUrls) == 0 {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"code":    fiber.StatusInternalServerError,
@@ -157,7 +159,7 @@ func CreatePromptForIDHandler(ctx *fiber.Ctx) error {
 // @Param id path string true "Version ID"
 // @Success 201 {object} CreatePromptRequest
 // @Router /v1/prompts/list/{id} [get]
-func ListPromptsForIDHandler(ctx *fiber.Ctx) error {
+func (h *handler) ListPromptsForIDHandler(ctx *fiber.Ctx) error {
 	id := ctx.Params("id"); if len(id) == 0 {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"code": fiber.StatusBadRequest,
@@ -176,4 +178,8 @@ func ListPromptsForIDHandler(ctx *fiber.Ctx) error {
 		Code: fiber.StatusOK,
 		Prompts: prompts,
 	})
+}
+
+func createHandler() *handler {
+	return &handler{}
 }

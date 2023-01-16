@@ -3,6 +3,8 @@ package payments
 import "github.com/gofiber/fiber/v2"
 
 func Init(router fiber.Router) {
-	router.Post("/create", CreatePaymentLinkHandler)
-	router.Post("/webhook", WebhookListenerHandler)
+	h := createHandler()
+
+	router.Post("/create", h.CreatePaymentLinkHandler)
+	router.Post("/webhook", h.WebhookListenerHandler)
 }
