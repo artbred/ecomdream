@@ -4,6 +4,7 @@ import (
 	"ecomdream/src/pkg/config"
 	v1 "ecomdream/src/services/api/core/v1"
 	"ecomdream/src/services/api/internal/middleware"
+	"ecomdream/src/services/api/internal/monitoring"
 	"ecomdream/src/services/api/internal/server"
 	"ecomdream/src/services/api/internal/swagger"
 	"fmt"
@@ -23,6 +24,7 @@ func SetupAPI(router fiber.Router) {
 // @BasePath /api
 func main() {
 	app := fiber.New(server.LoadFiberServerConfig())
+	go monitoring.Start()
 
 	middleware.SetupMiddleware(app)
 	swagger.ServeDocs(app)

@@ -8,12 +8,19 @@ import (
 type imageServiceServer struct{}
 
 func (s *imageServiceServer) ValidateAndResizeImages(ctx context.Context, req *contracts.ValidateAndResizeImagesRequest) (*contracts.ValidateAndResizeImagesResponse, error) {
-	var results []*contracts.Image
+	result := &contracts.ValidateAndResizeImagesResponse{}
+	resultCh := make(chan *contracts.Image)
 
 	for _, image := range req.Images {
-		result := CheckConvertAndResizeImage(image)
-		results = append(results, result)
+		go func(image *contracts.Image) {
+			result := CheckConvertAndResizeImage(image)
+			resultCh <- result
+		}(image)
 	}
 
-	return &contracts.ValidateAndResizeImagesResponse{Images: results}, nil
+	for i := 0; i < len(req.Images); i++ {
+		result.Images = append(result.Images, <-resultCh)
+	}
+
+	return result, nil
 }

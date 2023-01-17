@@ -118,10 +118,7 @@ func StartDreamBoothTraining(ctx context.Context, modelRequest DreamBoothRequest
 		return
 	}
 
-	err = json.Unmarshal(resBytes, &response); if err != nil {
-		return
-	}
-
+	err = json.Unmarshal(resBytes, &response)
 	return
 }
 

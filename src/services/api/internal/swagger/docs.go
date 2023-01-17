@@ -9,9 +9,11 @@ import (
 )
 
 func ServeDocs(app *fiber.App) {
-	app.Use(basicauth.New(basicauth.Config{
+	app.Group("/swagger").
+	Use(basicauth.New(basicauth.Config{
 		Users: map[string]string{
 			os.Getenv("ADMIN_USERNAME"): os.Getenv("ADMIN_PASSWORD"),
 		},
-	})).Group("/swagger").Get("*", swagger.HandlerDefault)
+	})).
+	Get("*", swagger.HandlerDefault)
 }

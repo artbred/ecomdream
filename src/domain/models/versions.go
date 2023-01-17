@@ -32,7 +32,8 @@ type Version struct {
 }
 
 type VersionExtendedInfo struct {
-	AmountImagesGenerated int `db:"amount_images_generated" json:"amount_images_generated"`
+	VersionID string `db:"version_id" json:"version_id"`
+	AmountImagesGenerated int `db:"total_image_count" json:"total_image_count"`
 	Features
 }
 
@@ -150,12 +151,30 @@ func (v *Version) LoadExtendedInfo() (info VersionExtendedInfo, err error) {
 	conn := postgres.Connection()
 
 	query := `
-		SELECT SUM(DISTINCT plans.feature_amount_images) as feature_amount_images, SUM(DISTINCT plans.feature_amount_image_to_prompt) as feature_amount_image_to_prompt, COUNT(DISTINCT images.id) as amount_images_generated
-		FROM payments
-		JOIN plans ON payments.plan_id = plans.id
-		JOIN prompts ON payments.version_id = prompts.version_id
-		JOIN images ON prompts.id = images.prompt_id
-		WHERE payments.paid_at IS NOT NULL AND payments.version_id = $1
+		SELECT
+		  COALESCE(subquery.version_id, $1) as version_id,
+		  COALESCE(subquery.total_feature_amount_images,0) as feature_amount_images,
+		  COALESCE(subquery.total_feature_amount_image_to_prompt,0) as feature_amount_image_to_prompt,
+		  COALESCE(COUNT(images.id),0) as total_image_count
+		FROM
+		  (SELECT
+			payments.version_id,
+			SUM(plans.feature_amount_images) as total_feature_amount_images,
+			SUM(plans.feature_amount_image_to_prompt) as total_feature_amount_image_to_prompt
+		  FROM
+			payments
+		  JOIN plans ON payments.plan_id = plans.id
+		  WHERE
+			payments.version_id = $1
+			AND payments.paid_at IS NOT NULL
+		  GROUP BY
+			payments.version_id) as subquery
+		LEFT JOIN prompts ON subquery.version_id = prompts.version_id
+		LEFT JOIN images ON prompts.id = images.prompt_id
+		GROUP BY
+		  subquery.version_id,
+		  subquery.total_feature_amount_images,
+		  subquery.total_feature_amount_image_to_prompt
 	`
 
 	err = conn.Get(&info, query, v.ID)

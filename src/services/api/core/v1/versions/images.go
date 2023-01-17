@@ -72,7 +72,6 @@ func processImagesToZip(form *multipart.Form) (zipOut *bytes.Buffer, err error) 
 		}
 	}
 
-
 	if len(errText) > 0 {
 		return nil, errors.New(errText)
 	}

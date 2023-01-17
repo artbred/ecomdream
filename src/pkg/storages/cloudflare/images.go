@@ -50,6 +50,8 @@ func UploadImageByURL(imageFromURL ImageUploadRequestByURL) (imageResponse *clou
 		return nil, fmt.Errorf("can't upload image to cloudflare, %w", err)
 	}
 
+	defer res.Body.Close()
+
 	bodyRes, err := io.ReadAll(res.Body); if err != nil {
 		return nil, fmt.Errorf("io.ReadALL cloudlfare response: %w", err)
 	}
