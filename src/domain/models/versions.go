@@ -8,32 +8,32 @@ import (
 )
 
 type Version struct {
-	ID string `db:"id"`
+	ID string `db:"id" json:"id"`
 
-	ModelID      *string `db:"model_id"`
-	PredictionID string  `db:"prediction_id"`
+	ModelID *string `db:"model_id" json:"-"`
+	PredictionID string  `db:"prediction_id" json:"-"`
 
-	Identifier string `db:"identifier"`
-	Class      string `db:"class"`
+	Identifier string `db:"identifier" json:"identifier"`
+	Class      string `db:"class" json:"class"`
 
-	InstancePrompt string `db:"instance_prompt"`
-	ClassPrompt    string `db:"class_prompt"`
-	InstanceData   string `db:"instance_data"`
+	InstancePrompt string `db:"instance_prompt" json:"-"`
+	ClassPrompt    string `db:"class_prompt" json:"-"`
+	InstanceData   string `db:"instance_data" json:"-"`
 
-	TrainerVersion string `db:"trainer_version"`
-	MaxTrainStep int64  `db:"max_train_steps"`
-	Model        *string `db:"model"`
+	TrainerVersion string `db:"trainer_version" json:"-"`
+	MaxTrainStep int64  `db:"max_train_steps" json:"-"`
+	Model        *string `db:"model" json:"-"`
 
-	CreatedAt time.Time  `db:"created_at"`
-	PushedAt  *time.Time `db:"pushed_at"`
-	DeletedAt *time.Time `db:"deleted_at"`
+	CreatedAt time.Time  `db:"created_at" json:"created_at"`
+	PushedAt  *time.Time `db:"pushed_at" json:"-"`
+	DeletedAt *time.Time `db:"deleted_at" json:"deleted_at"`
 
-	AmountImagesGenerated int `db:"amount_images_generated"`
+	VersionExtendedInfo `json:"extended_info"`
 }
 
 type VersionExtendedInfo struct {
-	VersionID string `db:"version_id" json:"version_id"`
-	AmountImagesGenerated int `db:"total_image_count" json:"total_image_count"`
+	VersionID string `db:"version_id" json:"-"`
+	AmountImagesGenerated int `db:"total_image_count" json:"amount_images_generated"`
 	Features
 }
 
@@ -74,7 +74,7 @@ func GetVersion(id string) (version *Version, err error) {
 
 	query := `SELECT
     	versions.*,
-       	count(images.id) as amount_images_generated FROM versions
+       	count(images.id) as total_image_count FROM versions
 		LEFT JOIN prompts ON prompts.version_id=versions.id
 		LEFT JOIN images ON images.prompt_id=prompts.id
 		WHERE versions.id=$1 GROUP BY versions.id`
@@ -147,7 +147,7 @@ func (v *Version) GetImages() (images []Image, err error) {
 	return
 }
 
-func (v *Version) LoadExtendedInfo() (info VersionExtendedInfo, err error) {
+func (v *Version) LoadExtendedInfo() (err error) {
 	conn := postgres.Connection()
 
 	query := `
@@ -177,7 +177,7 @@ func (v *Version) LoadExtendedInfo() (info VersionExtendedInfo, err error) {
 		  subquery.total_feature_amount_image_to_prompt
 	`
 
-	err = conn.Get(&info, query, v.ID)
+	err = conn.Get(v, query, v.ID)
 	if err != nil {
 		logrus.WithError(err).Errorf("can't get extended info for version %s", v.ID)
 	}

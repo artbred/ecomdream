@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-//TODO ctx.Params("id") does not work because it is init before endpoint
+//TODO ctx.Params("id") does not work because it is init before endpoint, the only solution is to duplicate code inside each endpoint
 
 func FreezeEndpointForID(ctx *fiber.Ctx) error {
 	id := string(ctx.Request().URI().LastPathSegment()); if len(id) == 0 {

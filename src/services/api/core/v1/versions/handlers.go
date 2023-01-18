@@ -122,8 +122,7 @@ func (h *handler) TrainVersionHandler(ctx *fiber.Ctx) error {
 		TrainerVersion: replicate.TrainerVersion,
 	}
 
-	err = version.Create(payment)
-	if err != nil {
+	err = version.Create(payment); if err != nil {
 		logrus.WithField("payment_id", payment.ID).Error(err)
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"code":    fiber.StatusInternalServerError,
@@ -131,7 +130,7 @@ func (h *handler) TrainVersionHandler(ctx *fiber.Ctx) error {
 		})
 	}
 
-	logrus.Infof("Strarted training proccess for payment %s", payment.ID)
+	logrus.Infof("Strarted training proccess for version %s", version.ID)
 
 	return ctx.Status(fiber.StatusCreated).JSON(TrainVersionResponse{
 		Code:      fiber.StatusCreated,
@@ -175,11 +174,11 @@ func (h *handler) VersionInfoHandler(ctx *fiber.Ctx) error {
 			Code:         fiber.StatusOK,
 			IsReady:      false,
 			TimeTraining: time.Now().UTC().Sub(version.CreatedAt).String(),
-			Info: nil,
+			Version: nil,
 		})
 	}
 
-	info, err := version.LoadExtendedInfo(); if err != nil {
+	err = version.LoadExtendedInfo(); if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"code":    fiber.StatusInternalServerError,
 			"message": "Please try again later",
@@ -190,7 +189,7 @@ func (h *handler) VersionInfoHandler(ctx *fiber.Ctx) error {
 		Code: fiber.StatusOK,
 		IsReady: true,
 		TimeTraining: version.PushedAt.Sub(version.CreatedAt).String(),
-		Info: &info,
+		Version: version,
 	})
 }
 
