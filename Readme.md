@@ -1,7 +1,5 @@
 ## This project is a simple REST API that allows to train dreambooth model, charge for usage and inference it. It works on top of [Replicate](https://replicate.com)
 
-**Please note that this project is not perfect and has some drawbacks, however I believe that the current state will be enough to assess my skills. Some inefficiencies are marked in TODOs**
-
 ### This project has 3 services
 + [api](./src/services/api) - rest api
 + [cron](./src/services/cron) - performs simple cron tasks
@@ -24,4 +22,5 @@
 
 2. User pays using payment link and gets ``payment_id``, then one prepares images and sends request to ``/api/v1/versions/train/{id}`` where ``{id}`` is ``payment_id`` that one received after payment
    1. I have [middleware](./src/services/api/internal/middleware/freeze.go) that sets key in redis in order to block extra requests from same user (payment_id). It takes some time to prepare data and receive success response from replicate (meaning that they started the training process) so it is possible to abuse the system. After endpoint is done key will be deleted from redis, or it will be automatically deleted in 5 minutes
-   2. Images are send to [imager](./src/services/imager) where they are check for being more than 512x512 pixels and that they have supported content-type, if one image does not meet requirements it is stored in response so user might receive all issues after first request. The process of checking
+   2. Images are send to [imager](./src/services/imager) where they are check for being more than 512x512 pixels and that they have supported content-type, if one image does not meet requirements data about that is stored in response so user might receive all issues after first request. The process of checking involves [concurrency](https://github.com/artbred/ecomdream/blob/e9e1af2e9132c34f00eec79b831fdde320a678ce/src/services/imager/server.go#L12-L23)
+   3. If everything is alright imager returns images and api forms zip archive which is then uploaded to bucket.

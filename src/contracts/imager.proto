@@ -3,23 +3,25 @@ syntax = "proto3";
 package contracts;
 option go_package = ".;contracts";
 
-
-
 service ImageService {
     rpc ValidateAndResizeImages (ValidateAndResizeImagesRequest) returns (ValidateAndResizeImagesResponse) {}
 }
 
 message ValidateAndResizeImagesRequest {
-    repeated Image images = 1;
+    string paymentID = 1;
+    repeated Image images = 2;
 }
 
 message ValidateAndResizeImagesResponse {
-    repeated Image images = 1;
+    ZipData zipData = 1;
 }
 
 message Image {
     string id = 1;
-    string content_type = 2;
-    string error = 3;
-    bytes data = 4;
+    string error = 2;
+    bytes data = 3;
+}
+
+message ZipData {
+    string url = 1;
 }

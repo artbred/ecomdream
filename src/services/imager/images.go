@@ -8,11 +8,11 @@ import (
 )
 
 var supportedImages = []string{
-	"image/jpeg",
-	"image/png",
-	"image/jpg",
-	"image/heic",
-	"image/webp",
+	"jpeg",
+	"png",
+	"jpg",
+	"heic",
+	"webp",
 }
 
 func arrayContains(arr []string, target string) bool {
@@ -26,29 +26,29 @@ func arrayContains(arr []string, target string) bool {
 }
 
 func CheckConvertAndResizeImage(inputImage *contracts.Image) *contracts.Image {
-	if !arrayContains(supportedImages, inputImage.ContentType) {
-		inputImage.Error = fmt.Sprintf("Image %s has unsupported format\n", inputImage.Id)
-		return inputImage
-	}
-
 	imgBmg := bimg.NewImage(inputImage.Data); if imgBmg.Image() == nil {
-		inputImage.Error = fmt.Sprintf("Image %s is corrupted\n", inputImage.Id)
+		inputImage.Error = fmt.Sprintf("Image %s is corrupted", inputImage.Id)
 		return inputImage
 	}
 
-	size, err := imgBmg.Size(); if err != nil {
-		inputImage.Error = fmt.Sprintf("Image %s is corrupted\n", inputImage.Id)
+	imgMetadata, err := imgBmg.Metadata(); if err != nil {
+		inputImage.Error = fmt.Sprintf("Image %s is corrupted", inputImage.Id)
 		return inputImage
 	}
 
-	if size.Height < 512 || size.Width < 512 {
-		inputImage.Error = fmt.Sprintf("Image %s must be 512x512 or more\n", inputImage.Id)
+	if !arrayContains(supportedImages, imgMetadata.Type) {
+		inputImage.Error = fmt.Sprintf("Image %s has unsupported format", inputImage.Id)
+		return inputImage
+	}
+
+	if imgMetadata.Size.Height < 512 || imgMetadata.Size.Width < 512 {
+		inputImage.Error = fmt.Sprintf("Image %s must be 512x512 or more", inputImage.Id)
 		return inputImage
 	}
 
 	imgJpeg, err := imgBmg.Convert(bimg.JPEG); if err != nil {
 		logrus.Error(err)
-		inputImage.Error = fmt.Sprintf("We can't convert image %s to jpeg, please convert it on your side\n", inputImage.Id)
+		inputImage.Error = fmt.Sprintf("We can't convert image %s to jpeg, please convert it on your side", inputImage.Id)
 		return inputImage
 	}
 
@@ -59,7 +59,7 @@ func CheckConvertAndResizeImage(inputImage *contracts.Image) *contracts.Image {
 
 	if err != nil {
 		logrus.Error(err)
-		inputImage.Error = fmt.Sprintf("We can't resize image %s to 512x512, please resize it on your side\n")
+		inputImage.Error = fmt.Sprintf("We can't resize image %s to 512x512, please resize it on your side", inputImage.Id)
 		return inputImage
 	}
 

@@ -4,8 +4,6 @@ import (
 	"context"
 	"ecomdream/src/domain/models"
 	"ecomdream/src/domain/replicate"
-	"ecomdream/src/pkg/storages/bucket"
-	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/sirupsen/logrus"
 	"github.com/twinj/uuid"
@@ -83,23 +81,14 @@ func (h *handler) TrainVersionHandler(ctx *fiber.Ctx) error {
 		})
 	}
 
-	zipImages, err := processImagesToZip(form); if err != nil {
+	imagerResponse, err := validateAndUploadImages(payment.ID, form); if err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"code":    fiber.StatusBadRequest,
 			"message": err.Error(),
 		})
 	}
 
-	zipURL, err := bucket.Upload(fmt.Sprintf("%s.zip", payment.ID), zipImages, int64(zipImages.Len()), "application/zip")
-	if err != nil {
-		logrus.WithField("payment_id", payment.ID).Error(err)
-		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"code":    fiber.StatusInternalServerError,
-			"message": "Please try again later",
-		})
-	}
-
-	inputData := replicate.ConstructDreamBoothInputs(class, zipURL, replicate.TrainerVersion)
+	inputData := replicate.ConstructDreamBoothInputs(class, imagerResponse.ZipData.Url, replicate.TrainerVersion)
 	replicateRes, err := replicate.StartDreamBoothTraining(context.Background(), inputData)
 	if err != nil {
 		logrus.WithField("payment_id", payment.ID).Error(err)
