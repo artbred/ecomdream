@@ -22,5 +22,7 @@ func (s *imageServiceServer) ValidateAndResizeImages(ctx context.Context, req *c
 		result.Images = append(result.Images, <-resultCh)
 	}
 
+	// TODO zip images, upload to bucket and return url
+
 	return result, nil
 }

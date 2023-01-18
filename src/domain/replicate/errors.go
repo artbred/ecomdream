@@ -11,11 +11,11 @@ var (
 )
 
 func parseError(err error) error {
-	if strings.Contains(err.Error(), "context canceled") {
+	if errors.As(err, &context.Canceled) {
 		return context.Canceled
 	}
 
-	if strings.Contains(err.Error(), "context deadline exceeded") {
+	if errors.As(err, &context.DeadlineExceeded) {
 		return context.DeadlineExceeded
 	}
 
