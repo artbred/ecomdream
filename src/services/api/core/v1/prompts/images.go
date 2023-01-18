@@ -13,8 +13,7 @@ func TransferReplicateImagesToCloudflareAndSave(replicateOutResponse *replicate.
 	var imagesGeneratedUrls []string
 	var wg sync.WaitGroup
 
-	imageChan := make(chan *models.Image)
-	defer close(imageChan)
+	imageChan := make(chan *models.Image, len(replicateOutResponse.Output))
 
 	for _, imageReplicate := range replicateOutResponse.Output {
 		wg.Add(1)
@@ -28,6 +27,7 @@ func TransferReplicateImagesToCloudflareAndSave(replicateOutResponse *replicate.
 	}
 
 	wg.Wait()
+	close(imageChan)
 
 	for image := range imageChan {
 		imagesGeneratedUrls = append(imagesGeneratedUrls, image.CdnURL)
