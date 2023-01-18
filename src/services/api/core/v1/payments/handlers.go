@@ -8,6 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/stripe/stripe-go/v73"
 	"github.com/stripe/stripe-go/v73/checkout/session"
+	"github.com/stripe/stripe-go/v73/promotioncode"
 	"github.com/stripe/stripe-go/v73/webhook"
 	"github.com/twinj/uuid"
 )
@@ -93,11 +94,14 @@ func (h *handler) CreatePaymentLinkHandler(ctx *fiber.Ctx) error {
 	}
 
 	if req.PromocodeID != nil {
-		discounts = append(discounts, &stripe.CheckoutSessionDiscountParams{
-			PromotionCode: req.PromocodeID,
-		})
+		_, err := promotioncode.Get(*req.PromocodeID, nil)
+		if err == nil {
+			discounts = append(discounts, &stripe.CheckoutSessionDiscountParams{
+				PromotionCode: req.PromocodeID,
+			})
 
-		payment.PromocodeID = req.PromocodeID
+			payment.PromocodeID = req.PromocodeID
+		}
 	}
 
 	params := &stripe.CheckoutSessionParams{
