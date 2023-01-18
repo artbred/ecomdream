@@ -30,7 +30,7 @@
 4. Once version has field ``pushed_at is not null`` user can perform request to trained model and inference prompts using endpoint ``/api/v1/prompts/create/{id}``
     1. When user sends request this endpoint also freezes using same [middleware](./src/services/api/internal/middleware/freeze.go) so there can not be concurrent request for same model
    2. When you inference any model on replicate it returns you ``prediction_id`` which is then used for getting info about running prediction. In order to continuously check for prediction status I use [this function](https://github.com/artbred/ecomdream/blob/a9384e29da19f5a75808b11427f613865b23b7a6/src/domain/replicate/predictions.go#L75-L121)
-   3. After the prediction is done I transfer images from [replicate to cloudflare](https://github.com/artbred/ecomdream/blob/a9384e29da19f5a75808b11427f613865b23b7a6/src/services/api/core/v1/prompts/images.go#L12-L37) using similar solution that you have seen before, however I added ``sync.WaitGroup`` since I do not need to process images until each image is uploaded to cloudflare.
+   3. After the prediction is done I transfer images from [replicate to cloudflare](https://github.com/artbred/ecomdream/blob/aae457464b3f2f0f38d62e97b20ddc1561df5c58/src/services/api/core/v1/prompts/images.go#L12-L38) using similar solution that you have seen before, however I added ``sync.WaitGroup`` since I do not need to process images until each image is uploaded to cloudflare.
 
 5. User can send request to ``/api/v1/prompts/list/{id}`` and get info about completed prompts, in order to achieve that in one query I implemented [custom type](https://github.com/artbred/ecomdream/blob/a9384e29da19f5a75808b11427f613865b23b7a6/src/domain/models/images.go#L25-L51)
 
