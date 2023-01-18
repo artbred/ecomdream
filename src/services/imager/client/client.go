@@ -3,7 +3,9 @@ package client
 import (
 	"context"
 	"ecomdream/src/contracts"
+	"errors"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"os"
 )
@@ -11,7 +13,8 @@ import (
 func ProcessImages(images []*contracts.Image) ([]*contracts.Image, error) {
 	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", os.Getenv("IMAGER_HOST"), os.Getenv("IMAGER_PORT")), grpc.WithInsecure())
 	if err != nil {
-		return nil, fmt.Errorf("did not connect: %v", err)
+		logrus.Error(err)
+		return nil, errors.New("Please try again later")
 	}
 	defer conn.Close()
 

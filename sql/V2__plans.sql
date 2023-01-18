@@ -17,5 +17,9 @@ INSERT INTO plans (is_init, price, plan_name, plan_description, feature_amount_i
     true, 1300, 'basic_init', 'efewfew', 100, 0
 );
 
+INSERT INTO plans (is_init, price, plan_name, plan_description, feature_amount_images, feature_amount_image_to_prompt) VALUES (
+  false, 1300, 'basic_extra_creds', 'ccewd', 1000, 0
+);
+
 
 

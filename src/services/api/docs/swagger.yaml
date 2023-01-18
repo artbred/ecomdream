@@ -1,5 +1,44 @@
 basePath: /api
 definitions:
+  models.Plan:
+    properties:
+      feature_amount_image_to_prompt:
+        description: TODO https://replicate.com/methexis-inc/img2prompt
+        type: integer
+      feature_amount_images:
+        type: integer
+      id:
+        type: integer
+      is_init:
+        type: boolean
+      plan_description:
+        type: string
+      plan_name:
+        type: string
+      price:
+        type: integer
+    type: object
+  models.VersionExtendedInfo:
+    properties:
+      feature_amount_image_to_prompt:
+        description: TODO https://replicate.com/methexis-inc/img2prompt
+        type: integer
+      feature_amount_images:
+        type: integer
+      total_image_count:
+        type: integer
+      version_id:
+        type: string
+    type: object
+  payments.AvailablePlansResponse:
+    properties:
+      code:
+        type: integer
+      plans:
+        items:
+          $ref: '#/definitions/models.Plan'
+        type: array
+    type: object
   payments.CreatePaymentLinkRequest:
     properties:
       plan_id:
@@ -38,7 +77,8 @@ definitions:
     properties:
       code:
         type: integer
-      info: {}
+      info:
+        $ref: '#/definitions/models.VersionExtendedInfo'
       is_ready:
         type: boolean
       time_training:
@@ -69,6 +109,19 @@ paths:
           schema:
             $ref: '#/definitions/payments.CreatePaymentLinkResponse'
       summary: Create payment link
+      tags:
+      - payments
+  /v1/payments/plans/list:
+    get:
+      description: List available plans
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/payments.AvailablePlansResponse'
+      summary: List available plans
       tags:
       - payments
   /v1/payments/webhook:
@@ -134,8 +187,8 @@ paths:
       produces:
       - application/json
       responses:
-        "201":
-          description: Created
+        "200":
+          description: OK
           schema:
             $ref: '#/definitions/prompts.CreatePromptRequest'
       summary: Returns prompts and images for version

@@ -7,9 +7,9 @@ import (
 	"net"
 	"os"
 
-	"google.golang.org/grpc"
-
 	"ecomdream/src/contracts"
+	_ "go.uber.org/automaxprocs"
+	"google.golang.org/grpc"
 )
 
 

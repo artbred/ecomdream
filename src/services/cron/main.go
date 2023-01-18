@@ -3,6 +3,7 @@ package main
 import (
 	"ecomdream/src/services/cron/jobs/dangling_prompts"
 	"ecomdream/src/services/cron/jobs/push_versions"
+	_ "go.uber.org/automaxprocs"
 	"time"
 )
 
@@ -25,5 +26,5 @@ func main() {
 	go GetJob("push_versions").Start(1 * time.Minute)
 	go GetJob("dangling_prompts").Start(30 * time.Second)
 
-	<- make(chan uint8)
+	<- make(chan bool)
 }

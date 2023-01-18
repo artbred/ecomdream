@@ -184,6 +184,29 @@ func (h *handler) WebhookListenerHandler(ctx *fiber.Ctx) error {
 	}
 }
 
+
+// ListAvailablePlansHandler handler lists available plans
+// @Description List available plans
+// @Summary List available plans
+// @Tags payments
+// @Produce json
+// @Success 200 {object} AvailablePlansResponse
+// @Router /v1/payments/plans/list [get]
+func (h *handler) ListAvailablePlansHandler(ctx *fiber.Ctx) error {
+	res := &AvailablePlansResponse{Code: fiber.StatusOK}
+	var err error
+
+	res.Plans, err = models.GetAvailablePlans()
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"code":    fiber.StatusInternalServerError,
+			"message": "Please try again later",
+		})
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(res)
+}
+
 func createHandler() *handler {
 	return &handler{}
 }

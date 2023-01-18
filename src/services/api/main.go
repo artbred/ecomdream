@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/sirupsen/logrus"
+	_ "go.uber.org/automaxprocs"
 	"path"
 	"runtime"
 	"strconv"

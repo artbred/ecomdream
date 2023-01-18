@@ -13,18 +13,31 @@ type Features struct {
 }
 
 type Plan struct {
-	ID int `db:"id"`
+	ID int `db:"id" json:"id"`
 
-	IsInit bool  `db:"is_init"`
-	Price  int64 `db:"price"`
+	IsInit bool  `db:"is_init" json:"is_init"`
+	Price  int64 `db:"price" json:"price"`
 
-	PlanName string `db:"plan_name"`
-	PlanDescription string `db:"plan_description"`
+	PlanName string `db:"plan_name" json:"plan_name"`
+	PlanDescription string `db:"plan_description" json:"plan_description"`
 
-	IsDeprecated bool `db:"is_deprecated"`
-	CreatedAt time.Time `db:"created_at"`
+	IsDeprecated bool `db:"is_deprecated" json:"-"`
+	CreatedAt time.Time `db:"created_at" json:"-"`
 
 	Features
+}
+
+func GetAvailablePlans() (plans []Plan, err error) {
+	conn := postgres.Connection()
+
+	query := `SELECT * FROM plans WHERE is_deprecated=false ORDER BY feature_amount_images ASC`
+
+	err = conn.Select(&plans, query)
+	if err != nil {
+		logrus.WithError(err).Error("can't get available plans")
+	}
+
+	return
 }
 
 func GetPlan(id int) (plan *Plan, err error) {

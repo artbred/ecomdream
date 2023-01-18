@@ -17,9 +17,9 @@ func TransferReplicateImagesToCloudflareAndSave(replicateOutResponse *replicate.
 
 	for _, imageReplicate := range replicateOutResponse.Output {
 		wg.Add(1)
-		go func(prompt *models.Prompt, imageReplicate string) {
+		go func(prompt *models.Prompt, imageReplicateUrl string) {
 			defer wg.Done()
-			image := replicateImageToCloudflare(prompt, imageReplicate)
+			image := replicateImageToCloudflare(prompt, imageReplicateUrl)
 			if image != nil {
 				imageChan <- image
 			}

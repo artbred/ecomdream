@@ -61,7 +61,7 @@ RUN DEBIAN_FRONTEND=noninteractive \
 
 
 RUN mkdir /go/src/ecomdream
-COPY ../api /go/src/ecomdream
+COPY . /go/src/ecomdream
 WORKDIR /go/src/ecomdream
 
 RUN go mod download

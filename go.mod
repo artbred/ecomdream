@@ -13,10 +13,12 @@ require (
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/joho/godotenv v1.4.0
 	github.com/minio/minio-go/v7 v7.0.45
+	github.com/prometheus/client_golang v1.14.0
 	github.com/sirupsen/logrus v1.9.0
 	github.com/stripe/stripe-go/v73 v73.16.0
 	github.com/swaggo/swag v1.8.1
 	github.com/twinj/uuid v1.0.0
+	go.uber.org/automaxprocs v1.5.1
 	google.golang.org/grpc v1.52.0
 	google.golang.org/protobuf v1.28.1
 )
@@ -57,7 +59,6 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/myesui/uuid v1.0.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/prometheus/client_golang v1.14.0 // indirect
 	github.com/prometheus/client_model v0.3.0 // indirect
 	github.com/prometheus/common v0.37.0 // indirect
 	github.com/prometheus/procfs v0.8.0 // indirect

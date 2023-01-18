@@ -175,7 +175,7 @@ func (h *handler) VersionInfoHandler(ctx *fiber.Ctx) error {
 			Code:         fiber.StatusOK,
 			IsReady:      false,
 			TimeTraining: time.Now().UTC().Sub(version.CreatedAt).String(),
-			Info:         nil,
+			Info: nil,
 		})
 	}
 
@@ -190,7 +190,7 @@ func (h *handler) VersionInfoHandler(ctx *fiber.Ctx) error {
 		Code: fiber.StatusOK,
 		IsReady: true,
 		TimeTraining: version.PushedAt.Sub(version.CreatedAt).String(),
-		Info: info,
+		Info: &info,
 	})
 }
 

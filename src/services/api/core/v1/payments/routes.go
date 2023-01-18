@@ -7,4 +7,6 @@ func Init(router fiber.Router) {
 
 	router.Post("/create", h.CreatePaymentLinkHandler)
 	router.Post("/webhook", h.WebhookListenerHandler)
+
+	router.Get("/plans/list", h.ListAvailablePlansHandler)
 }

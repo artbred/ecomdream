@@ -20,7 +20,7 @@ type Prompt struct {
 	PromptStrength float64 `db:"prompt_strength" json:"-"`
 	InferenceSteps int `db:"inference_steps" json:"-"`
 	GuidanceScale float64 `db:"guidance_scale" json:"-"`
-	Seed int `db:"seed" json:"-"`
+	Seed *int `db:"seed" json:"-"`
 
 	PredictionID string `db:"prediction_id" json:"-"`
 	PredictionTime *float64 `db:"prediction_time" json:"-"`

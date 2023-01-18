@@ -50,6 +50,26 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/payments/plans/list": {
+            "get": {
+                "description": "List available plans",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "payments"
+                ],
+                "summary": "List available plans",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/payments.AvailablePlansResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/payments/webhook": {
             "post": {
                 "description": "Webhook for stripe",
@@ -148,8 +168,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "201": {
-                        "description": "Created",
+                    "200": {
+                        "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/prompts.CreatePromptRequest"
                         }
@@ -237,6 +257,65 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "models.Plan": {
+            "type": "object",
+            "properties": {
+                "feature_amount_image_to_prompt": {
+                    "description": "TODO https://replicate.com/methexis-inc/img2prompt",
+                    "type": "integer"
+                },
+                "feature_amount_images": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "is_init": {
+                    "type": "boolean"
+                },
+                "plan_description": {
+                    "type": "string"
+                },
+                "plan_name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.VersionExtendedInfo": {
+            "type": "object",
+            "properties": {
+                "feature_amount_image_to_prompt": {
+                    "description": "TODO https://replicate.com/methexis-inc/img2prompt",
+                    "type": "integer"
+                },
+                "feature_amount_images": {
+                    "type": "integer"
+                },
+                "total_image_count": {
+                    "type": "integer"
+                },
+                "version_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "payments.AvailablePlansResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "plans": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Plan"
+                    }
+                }
+            }
+        },
         "payments.CreatePaymentLinkRequest": {
             "type": "object",
             "properties": {
@@ -296,7 +375,9 @@ const docTemplate = `{
                 "code": {
                     "type": "integer"
                 },
-                "info": {},
+                "info": {
+                    "$ref": "#/definitions/models.VersionExtendedInfo"
+                },
                 "is_ready": {
                     "type": "boolean"
                 },

@@ -157,7 +157,7 @@ func (h *handler) CreatePromptForIDHandler(ctx *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Param id path string true "Version ID"
-// @Success 201 {object} CreatePromptRequest
+// @Success 200 {object} CreatePromptRequest
 // @Router /v1/prompts/list/{id} [get]
 func (h *handler) ListPromptsForIDHandler(ctx *fiber.Ctx) error {
 	id := ctx.Params("id"); if len(id) == 0 {
