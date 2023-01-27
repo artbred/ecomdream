@@ -30,7 +30,6 @@ up_storages:
 
 .PHONY: rebuild
 rebuild:
-	go mod tidy
 	docker builder prune -f
 	docker-compose build --force-rm --no-cache
 
