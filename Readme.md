@@ -34,3 +34,6 @@
 
 5. User can send request to ``/api/v1/prompts/list/{id}`` and get info about completed prompts, in order to achieve that in one query I implemented [custom type](https://github.com/artbred/ecomdream/blob/a9384e29da19f5a75808b11427f613865b23b7a6/src/domain/models/images.go#L25-L51)
 
+#### There are no tests in this code, not because I ignore them, but because it was supposed to be an MVP and I wanted to write the code as quickly as possible
+
+#### The big problem with the number of users would be the replicate rate limit, to solve this problem I would make a separate service that would take requests from others and use [leaky bucket algorithm](https://github.com/uber-go/ratelimit)
