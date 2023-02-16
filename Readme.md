@@ -36,4 +36,6 @@
 
 #### There are no tests in this code, not because I ignore them, but because it was supposed to be an MVP and I wanted to write the code as quickly as possible
 
-#### The big problem with the number of users would be the replicate rate limit, to solve this problem I would make a separate service that would take requests from others and use [leaky bucket algorithm](https://github.com/uber-go/ratelimit)
+#### The big problem with the number of users would be the replicate rate limit, to solve this problem I would make a separate service that would take requests from others and use [leaky bucket algorithm](https://github.com/uber-go/ratelimit) and webhoks 
+
+#### I would also use validator package for requests and rewrite database primary keys, replce id varchars with uuid's
